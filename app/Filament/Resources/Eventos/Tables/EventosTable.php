@@ -15,9 +15,11 @@ use Illuminate\Database\Query\Builder;
 
 class EventosTable
 {
+
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('dataevento', 'desc')
             ->columns([
                           TextColumn::make('id')
                               ->label('ID')
