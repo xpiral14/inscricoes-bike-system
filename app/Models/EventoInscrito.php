@@ -8,6 +8,8 @@ class EventoInscrito extends Model
 {
     protected $table = 'tb_eventos_inscritos';
 
+    public $timestamps = false;
+
     public function usuarioModel()
     {
         return $this->belongsTo(Usuario::class, 'usuario');
