@@ -10,6 +10,7 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Query\Builder;
 
@@ -121,10 +122,16 @@ class EventosTable
                               ->numeric(),
                       ])
             ->filters([
-                          //
-                      ])
-            ->filters([
-                          //
+
+                          Filter::make('proximos_eventos')
+                              ->label('Próximos Eventos')
+                              ->query(fn (\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder => $query->where('dataevento', '>=', now()))
+                              ->indicateUsing(function (array $data): ?string {
+                                  if (isset($data['proximos_eventos']) && $data['proximos_eventos']) {
+                                      return 'Próximos Eventos';
+                                  }
+                                  return null;
+                              }),
                       ])
             ->recordActions([
                                 ViewAction::make(),
