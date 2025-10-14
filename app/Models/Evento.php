@@ -26,6 +26,7 @@ class Evento extends Model
         'active' => 'integer',
         'escolhercamisas' => 'boolean',
         'permitirinscricao' => 'boolean',
+        'date' => 'datetime'
     ];
 
     /**
