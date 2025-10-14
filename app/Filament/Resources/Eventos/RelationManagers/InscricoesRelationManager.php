@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Eventos\RelationManagers;
 
+use App\Filament\Resources\EventoInscritos\Schemas\EventoInscritoForm;
+use App\Filament\Resources\EventoInscritos\Tables\EventoInscritosTable;
 use Filament\Actions\AssociateAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -30,59 +32,7 @@ class InscricoesRelationManager extends RelationManager
 
     public function form(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-
-                             Select::make('situacao')
-                                 ->label('Situação')
-                                 ->options([
-                                               94 => 'Aguardando Pagamento',
-                                               1  => 'Aguardando Pagamento',
-                                               7  => 'Cancelado pelo PagSeguro',
-                                               5  => 'Comprador Solicitou Valor de Volta',
-                                               93 => 'Cortesia',
-                                               9  => 'Inscrito(a)',
-                                               85 => 'Marcado como Pago',
-                                               3  => 'Pago',
-                                               2  => 'Pagto em Análise',
-                                               18 => 'Prazo Pagto Esgotado',
-                                               70 => 'Reembolso Organizador',
-                                               75 => 'Transferido para outro evento',
-                                               6  => 'Valor Devolvido',
-                                           ])
-                                 ->required(),
-
-
-                             TextInput::make('camisa')
-                                 ->label('Camisa')
-                                 ->maxLength(45),
-
-
-                             Select::make('categoryID')
-                                 ->label('Categoria')
-                                 ->preload()
-                                 ->searchable()
-                                 ->relationship('categoria', 'name', fn($query, $record) => $query->where('event', $record->evento))
-                             ,
-
-
-                             TextInput::make('price')
-                                 ->label('Preço')
-                                 ->currencyMask('.', ',')
-                                 ->numeric()
-                                 ->prefix('R$'),
-
-
-                             TextInput::make('paymentNetAmount')
-                                 ->label('Valor Final')
-                                 ->currencyMask('.', ',')
-                                 ->numeric()
-                                 ->prefix('R$'),
-
-
-                             DateTimePicker::make('datalimite')
-                                 ->label('Data Limite'),
-                         ])->columns(2);
+        return EventoInscritoForm::configure($schema);
     }
 
     public function infolist(Schema $schema): Schema
@@ -155,67 +105,6 @@ class InscricoesRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
-        return $table
-            ->recordTitleAttribute('Inscrição')
-            ->modifyQueryUsing(fn(Builder $query) => $query->with(['usuarioModel', 'situacaoModel', 'categoria']))
-            ->columns([
-                          TextColumn::make('usuarioModel.nome')
-                              ->numeric()
-                              ->sortable(),
-                          TextColumn::make('datacad')
-                              ->label('Data de inscrição')
-                              ->dateTime()
-                              ->sortable(),
-                          TextColumn::make('datalimite')
-                              ->label('Data limite')
-                              ->dateTime()
-                              ->sortable(),
-                          TextColumn::make('situacaoModel.nome')
-                              ->label('Situação')
-                              ->numeric()
-                              ->sortable(),
-                          TextColumn::make('categoria.name')
-                              ->limit(50)
-                              ->sortable(),
-                          TextColumn::make('price')
-                              ->label('Valor')
-                              ->getStateUsing(fn($record) => $record->price * 100)
-                              ->currency('BRL'),
-                          TextColumn::make('paymentNetAmount')
-                              ->label('Valor final')
-                              ->getStateUsing(fn($record) => $record->paymentNetAmount * 100)
-                              ->currency('BRL'),
-                          TextColumn::make('Taxas')
-                              ->getStateUsing(fn($record) => $record->paymentNetAmount ? round((1.0 - ($record->paymentNetAmount / $record->price)) * 100, 2) : 0)
-                              ->suffix('%')
-                          ,
-                          TextColumn::make('paymentInstallments')
-                              ->label('Parcelas')
-                              ->numeric()
-                              ->default(0),
-                          TextColumn::make('camisa')
-                              ->searchable(),
-                          TextColumn::make('origem')
-                              ->getStateUsing(fn($record) => match ($record->origem) {
-                                  1       => 'Cadastro',
-                                  2       => 'Login',
-                                  3       => 'Reativação',
-                                  default => 'Outros',
-                              }),
-                      ])
-            ->filters([
-
-                      ])
-            ->recordActions([
-                                ViewAction::make(),
-                                EditAction::make(),
-                                DeleteAction::make(),
-                            ])
-            ->toolbarActions([
-                                 BulkActionGroup::make([
-                                                           DissociateBulkAction::make(),
-                                                           DeleteBulkAction::make(),
-                                                       ]),
-                             ]);
+        return EventoInscritosTable::configure($table);
     }
 }
