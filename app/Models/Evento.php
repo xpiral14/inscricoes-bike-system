@@ -44,15 +44,14 @@ class Evento extends Model
         return $this->hasMany(EventoInscrito::class, 'evento');
     }
 
-    // --- ACCESSORS PARA FORMATAR AS COLUNAS ---
-
-
-    /**
-     * Define o relacionamento com as inscrições do evento.
-     */
     public function inscricoes(): HasMany
     {
         // O segundo argumento 'evento' é a chave estrangeira na tabela tb_eventos_inscritos
         return $this->hasMany(EventoInscrito::class, 'evento');
+    }
+
+    public function pagamentos()
+    {
+        return $this->hasMany(Log::class, 'cod_transacao');
     }
 }
