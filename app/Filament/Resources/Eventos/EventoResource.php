@@ -6,6 +6,8 @@ use App\Filament\Resources\Eventos\Pages\CreateEvento;
 use App\Filament\Resources\Eventos\Pages\EditEvento;
 use App\Filament\Resources\Eventos\Pages\ListEventos;
 use App\Filament\Resources\Eventos\Pages\ViewEvento;
+use App\Filament\Resources\Eventos\RelationManagers\InscricoesRelationManager;
+use App\Filament\Resources\Eventos\RelationManagers\PagamentosRelationManager;
 use App\Filament\Resources\Eventos\Schemas\EventoForm;
 use App\Filament\Resources\Eventos\Schemas\EventoInfolist;
 use App\Filament\Resources\Eventos\Tables\EventosTable;
@@ -35,7 +37,7 @@ class EventoResource extends Resource
         return parent::getEloquentQuery()
             ->selectRaw('
             tb_eventos.*,
-            (SELECT fMoeda(sum(price)) FROM tb_eventos_inscritos where situacao = 3 and evento = tb_eventos.id) as VlrInscPG,
+            (SELECT sum(price) FROM tb_eventos_inscritos where situacao = 3 and evento = tb_eventos.id) as VlrInscPG,
             (SELECT count(*) FROM tb_eventos_inscritos where situacao in (85, 3, 93) and evento = tb_eventos.id) as Atletas
             ')
 
@@ -50,7 +52,7 @@ class EventoResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            InscricoesRelationManager::make()
         ];
     }
 
