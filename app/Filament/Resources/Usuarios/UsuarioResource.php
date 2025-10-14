@@ -29,11 +29,6 @@ class UsuarioResource extends Resource
         return UsuarioForm::configure($schema);
     }
 
-    public static function infolist(Schema $schema): Schema
-    {
-        return UsuarioInfolist::configure($schema);
-    }
-
     public static function table(Table $table): Table
     {
         return UsuariosTable::configure($table);
