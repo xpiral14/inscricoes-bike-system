@@ -12,6 +12,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder;
 
 class EventosTable
@@ -24,15 +25,20 @@ class EventosTable
             ->columns([
                           TextColumn::make('id')
                               ->label('ID')
+                              ->copyable()
                               ->sortable(),
 
                           ImageColumn::make('banner')
                               ->label('Banner'),
+                          TextColumn::make('titulo')
+                              ->limit(50)
+                              ->label('Título')
+                              ->searchable(),
 
                           TextColumn::make('active')
                               ->badge()
                               ->label('Situação')
-                              ->color(fn($state) => match($state) {
+                              ->color(fn($state) => match ($state) {
                                   0 => 'Bloqueado',
                                   1 => 'No Ar',
                                   2 => 'Não Listado',
@@ -47,7 +53,7 @@ class EventosTable
                               ->weight(fn($state): string => ((int)$state === 1) ? 'bold' : 'normal'),
 
                           TextColumn::make('organizadorModel.nome')
-                          ->label('Organizador')
+                              ->label('Organizador')
                               ->html()
                               ->formatStateUsing(function (Evento $record) {
                                   $organizadorNome = $record->organizadorModel->nome ?? 'Não informado';
@@ -55,7 +61,7 @@ class EventosTable
                                   $pagseguroEmail = $record->organizadorModel?->configuracao?->pagseguro_email ?? '';
                                   return "$organizadorNome<br/>PagSeguro: $pagseguroEmail";
                               })
-                              ->searchable(query: function (Builder $query, string $search): Builder {
+                              ->searchable(query: function (EloquentBuilder $query, string $search): EloquentBuilder {
                                   return $query->whereHas('organizadorModel', function ($q) use ($search) {
                                       $q->where('nome', 'like', "%{$search}%");
                                   });
@@ -99,25 +105,45 @@ class EventosTable
 
                           TextColumn::make('VlrInscPG')
                               ->label('Vlr. Insc. PG')
+                              ->toggleable()
                               ->money('BRL'),
 
                           TextColumn::make('vlrLIberado')
+                              ->toggleable()
                               ->label('Vlr. Lib. PS')
                               ->money('BRL'),
 
                           TextColumn::make('netValue')
-                              ->label('Vlr. Rec. PS')
+                              ->toggleable()
+                              ->label('Valor bruto recebido')
+                              ->money('BRL'),
+                          TextColumn::make('vlrComissaoTotal')
+                              ->toggleable()
+                              ->label('Comissão')
+                              ->money('BRL'),
+                          TextColumn::make('liquido')
+                              ->toggleable()
+                              ->getStateUsing(fn($record) => $record->netValue - $record->vlrComissaoTotal)
+                              ->label('Líquido')
+                              ->money('BRL'),
+                          TextColumn::make('Valor final')
+                              ->toggleable()
+                              ->getStateUsing(fn($record) => $record->netValue - $record->vlrComissaoTotal - $record->vlrpago)
+                              ->label('Devendo ao organizador')
                               ->money('BRL'),
 
                           TextColumn::make('vlrpago')
+                              ->toggleable()
                               ->label('Vlr. Pago ao Org.')
                               ->money('BRL'),
 
                           TextColumn::make('valorPagotaxas')
+                              ->toggleable()
                               ->label('Vlr. Pago Taxas')
                               ->money('BRL'),
 
                           TextColumn::make('qtdPgCartao')
+                              ->toggleable()
                               ->label('Pg. Cartão')
                               ->numeric(),
                       ])
@@ -125,7 +151,7 @@ class EventosTable
 
                           Filter::make('proximos_eventos')
                               ->label('Próximos Eventos')
-                              ->query(fn (\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder => $query->where('dataevento', '>=', now()))
+                              ->query(fn(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder => $query->where('dataevento', '>=', now()))
                               ->indicateUsing(function (array $data): ?string {
                                   if (isset($data['proximos_eventos']) && $data['proximos_eventos']) {
                                       return 'Próximos Eventos';
