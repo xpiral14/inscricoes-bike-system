@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Usuarios;
 
+use App\Filament\Resources\Eventos\RelationManagers\InscricoesRelationManager;
 use App\Filament\Resources\Usuarios\Pages\CreateUsuario;
 use App\Filament\Resources\Usuarios\Pages\EditUsuario;
 use App\Filament\Resources\Usuarios\Pages\ListUsuarios;
@@ -20,7 +21,7 @@ class UsuarioResource extends Resource
 {
     protected static ?string $model = Usuario::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::User;
 
     protected static ?string $recordTitleAttribute = 'Usuário';
 
@@ -37,7 +38,7 @@ class UsuarioResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            InscricoesRelationManager::make(),
         ];
     }
 
