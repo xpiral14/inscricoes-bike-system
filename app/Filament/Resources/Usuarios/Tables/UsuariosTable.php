@@ -48,7 +48,7 @@ class UsuariosTable
                               ->sortable(),
 
                           // 7. qtdEventos (Rotulado como 'Eventos' no HTML)
-                          TextColumn::make('qtdEventos')
+                          TextColumn::make('eventos_count')
                               ->label('Eventos')
                               ->numeric()
                               ->sortable(),
@@ -105,6 +105,9 @@ class UsuariosTable
             ->filters([
                           //
                       ])
+            ->modifyQueryUsing(function ($query) {
+                $query->withCount('eventos');
+            })
             ->recordActions([
                                 // Corresponde a 'Visualizar'
                                 ViewAction::make(),
