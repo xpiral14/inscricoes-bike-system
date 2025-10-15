@@ -29,4 +29,9 @@ class EventoInscrito extends Model
     {
         return $this->belongsTo(Evento::class, 'evento');
     }
+
+    public function logs()
+    {
+        return $this->hasMany(Log::class, 'cod_transacao');
+    }
 }
