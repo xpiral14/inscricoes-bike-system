@@ -3,14 +3,14 @@ FROM unit:1.34.1-php8.4
 # Instala dependências e Node.js 18 com npm
 RUN apt update && apt install -y \
     curl unzip git libicu-dev libzip-dev libpng-dev libjpeg-dev libfreetype6-dev libssl-dev \
-    libpq-dev ca-certificates gnupg \
-    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    libpq-dev libmariadb-dev ca-certificates gnupg \ # <-- ADDED libmariadb-dev (or libmysqlclient-dev)
+    && curl -fsSL https://deb.nodesource.com/setup_18.x |
+bash - \
     && apt install -y nodejs \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) pcntl opcache pdo pdo_pgsql intl zip gd exif ftp bcmath \
+    && docker-php-ext-install -j$(nproc) pcntl opcache pdo pdo_pgsql pdo_mysql intl zip gd exif ftp bcmath \ # <-- ADDED pdo_mysql
     && pecl install redis \
     && docker-php-ext-enable redis
-
 # Configurações do PHP
 RUN echo "opcache.enable=1" > /usr/local/etc/php/conf.d/custom.ini \
     && echo "opcache.jit=tracing" >> /usr/local/etc/php/conf.d/custom.ini \
