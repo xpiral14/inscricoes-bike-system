@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Eventos\Schemas;
 
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -194,7 +195,24 @@ class EventoForm
                                            ->mask('99:99')
                                            ->maxLength(5)
                                            ,
-
+                                       RichEditor::make('descricao')
+                                           ->columnSpanFull()
+                                           ->toolbarButtons([
+                                                                'attachFiles',
+                                                                'blockquote',
+                                                                'bold',
+                                                                'bulletList',
+                                                                'codeBlock',
+                                                                'h2',
+                                                                'h3',
+                                                                'italic',
+                                                                'link',
+                                                                'orderedList',
+                                                                'redo',
+                                                                'strike',
+                                                                'underline',
+                                                                'undo',
+                                                            ]),
                                        // --- Seção de Textos Longos ---
                                        Textarea::make('infopagamento')
                                            ->label('Info Pagamento para depósito')
