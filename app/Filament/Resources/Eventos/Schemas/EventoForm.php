@@ -15,216 +15,220 @@ class EventoForm
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
-                                       // --- Seção de Informações Básicas ---
-                                       TextInput::make('titulo')
-                                           ->label('Título')
-                                           ->required()
-                                           ->maxLength(80),
 
-                                       TextInput::make('videoyoutube')
-                                           ->label('Código Vídeo Youtube')
-                                           ->maxLength(150)
-                                           ->default(' ')
-                                           ->required(),
+                                       // --- 1. SEÇÃO: INFORMAÇÕES BÁSICAS ---
+                                       Section::make('Informações Básicas')
+                                           ->description('Título, Organizador e Mídia principal.')
+                                           ->collapsible()
+                                           ->columns(2)
+                                           ->schema([
+                                                        TextInput::make('titulo')
+                                                            ->label('Título')
+                                                            ->required()
+                                                            ->maxLength(80)
+                                                            ->columnSpanFull(),
 
-                                       Select::make('organizador')
-                                           ->label('Organizador')
-                                           ->relationship('organizadorModel', 'nome')
-                                           ->searchable()
-                                           ->required(),
+                                                        Select::make('organizador')
+                                                            ->label('Organizador')
+                                                            ->relationship('organizadorModel', 'nome')
+                                                            ->searchable()
+                                                            ->required(),
 
-                                       // --- Seção de Valores e Configurações de Taxas ---
-                                       Select::make('seguro')
-                                           ->label('Seguro?')
-                                           ->options([
-                                                         0 => 'Sem Seguro',
-                                                         1 => 'Obrigatório',
-                                                         2 => 'Opcional',
-                                                     ])
-                                           ->default(0) // Seu HTML mostra '1' selecionado, ajustei o default para o valor real
-                                           ,
+                                                        TextInput::make('videoyoutube')
+                                                            ->label('Código Vídeo Youtube')
+                                                            ->maxLength(150)
+                                                            ->default(' ')
+                                                            ->required(),
+                                                    ]),
 
-                                       TextInput::make('vlrSeguro')
-                                           ->label('Vlr Seguro')
-                                           ->prefix('R$')
-                                           ->currencyMask('.', ',')
-                                           ->default('0,00')
-                                           ,
+                                       // --- 2. SEÇÃO: DATAS E LOGÍSTICA ---
+                                       Section::make('Datas e Logística')
+                                           ->description('Horários do evento e opções logísticas.')
+                                           ->collapsible()
+                                           ->columns(3)
+                                           ->schema([
+                                                        TextInput::make('horaevento')
+                                                            ->label('Hora Inicial; Ex: 7:00')
+                                                            ->placeholder('HH:MM')
+                                                            ->mask('99:99')
+                                                            ->maxLength(5),
 
-                                       Select::make('taxaconv')
-                                           ->label('Tx Conv?')
-                                           ->options([
-                                                         0 => 'Sem Taxa',
-                                                         1 => 'Com Taxa',
-                                                     ])
-                                           ->default(0)
-                                           ,
+                                                        TextInput::make('horafinalprovavel')
+                                                            ->label('Hora Final provavel (Oculto, Google); Ex: 14:00')
+                                                            ->placeholder('HH:MM')
+                                                            ->mask('99:99')
+                                                            ->maxLength(5),
 
-                                       TextInput::make('vlrTaxaConv')
-                                           ->label('Vlr Tx Conv.')
-                                           ->prefix('R$')
-                                           ->currencyMask('.', ',')
-                                           ->default('0,00')
-                                           ,
+                                                        TextInput::make('horafinal')
+                                                            ->label('Hora Final (Visível site); Ex: 14:00')
+                                                            ->placeholder('HH:MM')
+                                                            ->mask('99:99')
+                                                            ->maxLength(5),
 
-                                       TextInput::make('valorfrete')
-                                           ->label('Valor Frete')
-                                           ->prefix('R$')
-                                           ->currencyMask('.', ',')
-                                           ->default('0,00')
-                                           ,
+                                                        Select::make('exportarendereco')
+                                                            ->label('Exportar Endereço')
+                                                            ->options([
+                                                                          0 => 'Não',
+                                                                          1 => 'Sim',
+                                                                      ])
+                                                            ->default(0),
 
-                                       // --- Seção de Logística e Opções ---
-                                       Select::make('exportarendereco')
-                                           ->label('Exportar Endereço')
-                                           ->options([
-                                                         0 => 'Não',
-                                                         1 => 'Sim',
-                                                     ])
-                                           ->default(0)
-                                           ,
+                                                        Select::make('escolhercamisas')
+                                                            ->label('Escolher Camisas?')
+                                                            ->required()
+                                                            ->options([
+                                                                          0 => 'Não',
+                                                                          1 => 'Sim',
+                                                                      ])
+                                                            ->default(0),
 
-                                       Select::make('escolhercamisas')
-                                           ->label('Escolher Camisas?')
-                                           ->required()
-                                           ->options([
-                                                         0 => 'Não',
-                                                         1 => 'Sim',
-                                                     ])
-                                           ->default(0)
-                                           ,
+                                                        Select::make('importarFiliados')
+                                                            ->label('Import Filiados? (Criar 1º Cupom Antes)')
+                                                            ->options([
+                                                                          0 => 'Não',
+                                                                          1 => 'Sim',
+                                                                      ])
+                                                            ->default(0),
+                                                    ]),
 
-                                       Select::make('ocultarValorCategorias')
-                                           ->label('Ocultar Valor Cat?')
-                                           ->options([
-                                                         0 => 'Não',
-                                                         1 => 'Sim',
-                                                     ])
-                                           ->default(0)
-                                           ,
+                                       // --- 3. SEÇÃO: CONFIGURAÇÕES DE VALORES ---
+                                       Section::make('Configurações de Valores e Taxas')
+                                           ->description('Valores de seguro, frete e visibilidade.')
+                                           ->collapsible()
+                                           ->columns(3)
+                                           ->schema([
+                                                        // Configuração de Seguro
+                                                        Select::make('seguro')
+                                                            ->label('Seguro?')
+                                                            ->options([
+                                                                          0 => 'Sem Seguro',
+                                                                          1 => 'Obrigatório',
+                                                                          2 => 'Opcional',
+                                                                      ])
+                                                            ->default(0),
 
-                                       Select::make('importarFiliados')
-                                           ->label('Import Filiados? (Criar 1º Cupom Antes)')
-                                           ->options([
-                                                         0 => 'Não',
-                                                         1 => 'Sim',
-                                                     ])
-                                           ->default(0)
-                                           ,
+                                                        TextInput::make('vlrSeguro')
+                                                            ->label('Vlr Seguro')
+                                                            ->prefix('R$')
+                                                            ->currencyMask('.', ',')
+                                                            ->default('0,00'),
 
-                                       // --- Seção de Comissões (Campos 'obrigatorios' no HTML) ---
-                                       TextInput::make('comissaopagos')
-                                           ->label('Comiss. Pagos')
-                                           ->required()
-                                           ->prefix('R$')
-                                           ->currencyMask('.', ',')
-                                           ->default('0,00')
-                                           ,
+                                                        TextInput::make('custoseguro')
+                                                            ->label('Valor Seguro Unitário') // Mudei a ordem para agrupar seguro
+                                                            ->required()
+                                                            ->prefix('R$')
+                                                            ->currencyMask('.', ',')
+                                                            ->default('0,00'),
 
-                                       TextInput::make('comissaomarcados')
-                                           ->label('Comiss. Marcados Pag')
-                                           ->required()
-                                           ->prefix('R$')
-                                           ->currencyMask('.', ',')
-                                           ->default('0,00')
-                                           ,
+                                                        // Configuração de Frete
+                                                        TextInput::make('valorfrete')
+                                                            ->label('Valor Frete')
+                                                            ->prefix('R$')
+                                                            ->currencyMask('.', ',')
+                                                            ->default('0,00'),
 
-                                       TextInput::make('comissaocortesia')
-                                           ->label('Comiss. Cortesia')
-                                           ->required()
-                                           ->prefix('R$')
-                                           ->currencyMask('.', ',')
-                                           ->default('0,00')
-                                           ,
+                                                        // Outras opções de valor
+                                                        Select::make('ocultarValorCategorias')
+                                                            ->label('Ocultar Valor Cat?')
+                                                            ->options([
+                                                                          0 => 'Não',
+                                                                          1 => 'Sim',
+                                                                      ])
+                                                            ->default(0),
+                                                    ]),
 
-                                       TextInput::make('comissaoreembolsoorg')
-                                           ->label('Comiss. Reembolso Organiz')
-                                           ->required()
-                                           ->prefix('R$')
-                                           ->currencyMask('.', ',')
-                                           ->default('0,00')
-                                           ,
+                                       // --- 4. SEÇÃO: COMISSÕES E TAXAS ADICIONAIS ---
+                                       Section::make('Comissões e Taxas')
+                                           ->description('Defina comissões para diferentes situações e taxas de convênio.')
+                                           ->collapsed() // Colapsada por padrão para simplificar a visão inicial
+                                           ->columns(4) // Usando 4 colunas para organizar melhor os campos de comissão
+                                           ->schema([
+                                                        // Taxa de Convênio
+                                                        Select::make('taxaconv')
+                                                            ->label('Tx Conv?')
+                                                            ->options([
+                                                                          0 => 'Sem Taxa',
+                                                                          1 => 'Com Taxa',
+                                                                      ])
+                                                            ->default(0),
 
-                                       TextInput::make('comissaotransferidoevento')
-                                           ->label('Comiss. Transf. out evt')
-                                           ->required()
-                                           ->prefix('R$')
-                                           ->currencyMask('.', ',')
-                                           ->default('0,00')
-                                           ,
+                                                        TextInput::make('vlrTaxaConv')
+                                                            ->label('Vlr Tx Conv.')
+                                                            ->prefix('R$')
+                                                            ->currencyMask('.', ',')
+                                                            ->default('0,00'),
 
-                                       TextInput::make('comissaodivulgador')
-                                           ->label('Comiss. Divulgador')
-                                           ->prefix('R$')
-                                           ->currencyMask('.', ',')
-                                           ->default('0,00')
-                                           ,
+                                                        // Toggle de Desconto (columnSpanFull para alinhar)
+                                                        Toggle::make('descontartaxasdoliquido')
+                                                            ->label('Descontar Taxas do Líquido?')
+                                                            ->default(true)
+                                                            ->columnSpanFull(),
 
-                                       TextInput::make('custoseguro')
-                                           ->label('Valor Seguro Unitário')
-                                           ->required()
-                                           ->prefix('R$')
-                                           ->currencyMask('.', ',')
-                                           ->default('0,00')
-                                           ,
+                                                        // Comissões (todos requeridos no seu código original)
+                                                        TextInput::make('comissaopagos')
+                                                            ->label('Comiss. Pagos')
+                                                            ->required()
+                                                            ->prefix('R$')
+                                                            ->currencyMask('.', ',')
+                                                            ->default('0,00'),
 
-                                       // O seu HTML usava um Select para o booleano aqui, mas um Toggle é mais idiomático no Filament
-                                       Toggle::make('descontartaxasdoliquido')
-                                           ->label('Descontar Taxas do Líquido?')
-                                           ->default(true)
-                                           ,
+                                                        TextInput::make('comissaomarcados')
+                                                            ->label('Comiss. Marcados Pag')
+                                                            ->required()
+                                                            ->prefix('R$')
+                                                            ->currencyMask('.', ',')
+                                                            ->default('0,00'),
 
-                                       // --- Seção de Horários ---
-                                       TextInput::make('horaevento')
-                                           ->label('Hora Inicial; Ex: 7:00')
-                                           ->placeholder('HH:MM')
-                                           ->mask('99:99') // Usa máscara para formato de hora
-                                           ->maxLength(5)
-                                           ,
+                                                        TextInput::make('comissaocortesia')
+                                                            ->label('Comiss. Cortesia')
+                                                            ->required()
+                                                            ->prefix('R$')
+                                                            ->currencyMask('.', ',')
+                                                            ->default('0,00'),
 
-                                       TextInput::make('horafinalprovavel')
-                                           ->label('Hora Final provavel (Oculto, Google); Ex: 14:00')
-                                           ->placeholder('HH:MM')
-                                           ->mask('99:99')
-                                           ->maxLength(5)
-                                           ,
+                                                        TextInput::make('comissaoreembolsoorg')
+                                                            ->label('Comiss. Reembolso Organiz')
+                                                            ->required()
+                                                            ->prefix('R$')
+                                                            ->currencyMask('.', ',')
+                                                            ->default('0,00'),
 
-                                       TextInput::make('horafinal')
-                                           ->label('Hora Final (Visível site); Ex: 14:00')
-                                           ->placeholder('HH:MM')
-                                           ->mask('99:99')
-                                           ->maxLength(5)
-                                           ,
-                                       RichEditor::make('descricao')
-                                           ->columnSpanFull()
-                                           ->toolbarButtons([
-                                                                'attachFiles',
-                                                                'blockquote',
-                                                                'bold',
-                                                                'bulletList',
-                                                                'codeBlock',
-                                                                'h2',
-                                                                'h3',
-                                                                'italic',
-                                                                'link',
-                                                                'orderedList',
-                                                                'redo',
-                                                                'strike',
-                                                                'underline',
-                                                                'undo',
-                                                            ]),
-                                       // --- Seção de Textos Longos ---
-                                       Textarea::make('infopagamento')
-                                           ->label('Info Pagamento para depósito')
-                                           ->columnSpanFull()
-                                           ->rows(3),
+                                                        TextInput::make('comissaotransferidoevento')
+                                                            ->label('Comiss. Transf. out evt')
+                                                            ->required()
+                                                            ->prefix('R$')
+                                                            ->currencyMask('.', ',')
+                                                            ->default('0,00'),
 
-                                       Textarea::make('mapa')
-                                           ->label('Mapa')
-                                           ->columnSpanFull()
-                                           ->rows(5)
-                                           ,
+                                                        TextInput::make('comissaodivulgador')
+                                                            ->label('Comiss. Divulgador')
+                                                            ->prefix('R$')
+                                                            ->currencyMask('.', ',')
+                                                            ->default('0,00'),
+                                                    ]),
 
-                                   ]);
+                                       // --- 5. SEÇÃO: DETALHES E CONTEÚDO ---
+                                       Section::make('Detalhes e Conteúdo')
+                                           ->description('Descrições longas e mídias visuais.')
+                                           ->collapsible()
+                                           ->schema([
+                                                        RichEditor::make('descricao')
+                                                            ->columnSpanFull()
+                                                            ->toolbarButtons([
+                                                                                 'attachFiles', 'blockquote', 'bold', 'bulletList', 'codeBlock', 'h2', 'h3', 'italic',
+                                                                                 'link', 'orderedList', 'redo', 'strike', 'underline', 'undo',
+                                                                             ]),
+
+                                                        Textarea::make('infopagamento')
+                                                            ->label('Info Pagamento para depósito')
+                                                            ->rows(3)
+                                                            ->columnSpanFull(),
+
+                                                        Textarea::make('mapa')
+                                                            ->label('Mapa')
+                                                            ->rows(5)
+                                                            ->columnSpanFull(),
+                                                    ]),
+                                   ])->columns(1);
     }
 }
