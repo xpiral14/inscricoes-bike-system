@@ -28,6 +28,9 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 class InscricoesRelationManager extends RelationManager
 {
     protected static string $relationship = 'inscricoes';
+    protected static ?string $label = 'Inscrição';
+    protected static ?string $title = 'Inscrições';
+    protected static ?string $pluralLabel = 'Inscrições';
 
 
     public function form(Schema $schema): Schema
@@ -35,76 +38,17 @@ class InscricoesRelationManager extends RelationManager
         return EventoInscritoForm::configure($schema);
     }
 
-    public function infolist(Schema $schema): Schema
-    {
-        return $schema
-            ->components([
-                             TextEntry::make('usuario')
-                                 ->numeric(),
-                             TextEntry::make('datacad')
-                                 ->dateTime(),
-                             TextEntry::make('datalimite')
-                                 ->dateTime(),
-                             TextEntry::make('situacao')
-                                 ->numeric(),
-                             TextEntry::make('dataconfirm')
-                                 ->dateTime(),
-                             TextEntry::make('priceId')
-                                 ->numeric(),
-                             TextEntry::make('categoryID')
-                                 ->numeric(),
-                             TextEntry::make('price')
-                                 ->money(),
-                             TextEntry::make('paymentType')
-                                 ->numeric(),
-                             TextEntry::make('paymentSubtype')
-                                 ->numeric(),
-                             TextEntry::make('paymentInstallments')
-                                 ->numeric(),
-                             TextEntry::make('paymentNetAmount')
-                                 ->numeric(),
-                             TextEntry::make('camisa'),
-                             TextEntry::make('camisaId')
-                                 ->numeric(),
-                             TextEntry::make('chaveComent'),
-                             TextEntry::make('origem')
-                                 ->numeric(),
-                             TextEntry::make('seguro')
-                                 ->numeric(),
-                             TextEntry::make('vlrSeguro')
-                                 ->numeric(),
-                             TextEntry::make('infomarkpaid'),
-                             TextEntry::make('vlrlib')
-                                 ->numeric(),
-                             TextEntry::make('opcionais')
-                                 ->numeric(),
-                             TextEntry::make('emailenviado')
-                                 ->numeric(),
-                             TextEntry::make('kitenviado')
-                                 ->numeric(),
-                             TextEntry::make('dtkitenviado')
-                                 ->dateTime(),
-                             TextEntry::make('comissaobruta')
-                                 ->numeric(),
-                             TextEntry::make('divulgadorID')
-                                 ->numeric(),
-                             TextEntry::make('chave2')
-                                 ->numeric(),
-                             TextEntry::make('cupomDesc')
-                                 ->numeric(),
-                             TextEntry::make('pctDesconto')
-                                 ->numeric(),
-                             TextEntry::make('vlrDisponivel')
-                                 ->numeric(),
-                             TextEntry::make('dtVlrDisponivel')
-                                 ->dateTime(),
-                             TextEntry::make('releaseDate')
-                                 ->dateTime(),
-                         ]);
-    }
 
     public function table(Table $table): Table
     {
-        return EventoInscritosTable::configure($table);
+        EventoInscritosTable::configure($table);
+
+        $table->modifyQueryUsing(fn(Builder $query) => $query->with(['usuarioModel', 'situacaoModel', 'categoria', 'eventoModel']));
+        $columns = $table->getColumns();
+        array_shift($columns);
+        array_unshift($columns, TextColumn::make('eventoModel.titulo')->label('Evento')->sortable());
+        $table->columns($columns)->defaultSort('datacad', 'desc');
+        return $table;
+
     }
 }
