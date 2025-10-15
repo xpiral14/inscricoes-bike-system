@@ -228,9 +228,9 @@
                                 </div>
                                 <div class="flex items-center text-sm text-gray-500 mb-4">
                                     <i data-lucide="map-pin" class="w-4 h-4 mr-2"></i>
-                                    <span>${event.location}, ${event.state}</span>
+                                    <span>${event.cidade}, ${event.state}</span>
                                 </div>
-                                <a href="#" class="w-full text-center block ${eventStatus.color} text-white font-semibold py-2 rounded-md text-sm transition-opacity hover:opacity-90">
+                                <a href="${event.url}" class="w-full text-center block ${eventStatus.color} text-white font-semibold py-2 rounded-md text-sm transition-opacity hover:opacity-90">
                                     ${eventStatus.text}
                                 </a>
                             </div>
@@ -270,8 +270,9 @@
 
         let finalFilteredEvents = filteredByState;
         if (searchQuery) {
-            finalFilteredEvents = filteredByState.filter(event =>
-                event.name.toLowerCase().includes(searchQuery)
+            finalFilteredEvents = filteredByState.filter(event => {
+                    return event.name.toLowerCase().includes(searchQuery) || event.state.toLowerCase().includes(searchQuery) || event.cidade.toLowerCase().includes(searchQuery);
+                }
             );
         }
 
