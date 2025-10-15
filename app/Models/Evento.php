@@ -55,4 +55,19 @@ class Evento extends Model
     {
         return $this->hasMany(Log::class, 'cod_transacao');
     }
+
+    public function categorias()
+    {
+        return $this->hasMany(EventoCategoria::class, 'event');
+    }
+
+    public function inicioEvento()
+    {
+        return $this->dataevento->setTimeFromTimeString($this->horaevento . ':00');
+    }
+
+    public function estruturas()
+    {
+        return $this->belongsToMany(Estrutura::class, EventoEstrutura::class, 'event', 'structure');
+    }
 }
