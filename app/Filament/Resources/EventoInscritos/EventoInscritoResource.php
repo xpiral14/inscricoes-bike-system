@@ -6,6 +6,7 @@ use App\Filament\Resources\EventoInscritos\Pages\CreateEventoInscrito;
 use App\Filament\Resources\EventoInscritos\Pages\EditEventoInscrito;
 use App\Filament\Resources\EventoInscritos\Pages\ListEventoInscritos;
 use App\Filament\Resources\EventoInscritos\Pages\ViewEventoInscrito;
+use App\Filament\Resources\EventoInscritos\RelationManagers\LogsRelationManager;
 use App\Filament\Resources\EventoInscritos\Schemas\EventoInscritoForm;
 use App\Filament\Resources\EventoInscritos\Schemas\EventoInscritoInfolist;
 use App\Filament\Resources\EventoInscritos\Tables\EventoInscritosTable;
@@ -34,10 +35,6 @@ class EventoInscritoResource extends Resource
         return EventoInscritoForm::configure($schema);
     }
 
-    public static function infolist(Schema $schema): Schema
-    {
-        return EventoInscritoInfolist::configure($schema);
-    }
 
     public static function table(Table $table): Table
     {
@@ -62,7 +59,7 @@ class EventoInscritoResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            LogsRelationManager::make()
         ];
     }
 
