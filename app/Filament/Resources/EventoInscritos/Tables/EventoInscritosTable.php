@@ -19,7 +19,6 @@ class EventoInscritosTable
             ->recordTitleAttribute('Inscrição')
             ->modifyQueryUsing(fn(Builder $query) => $query->with(['usuarioModel', 'situacaoModel', 'categoria']))
             ->columns([
-                          TextColumn::make('evento.nome'),
                           TextColumn::make('usuarioModel.nome')
                               ->label('Nome')
                               ->numeric()
