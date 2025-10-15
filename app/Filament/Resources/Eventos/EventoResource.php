@@ -23,7 +23,8 @@ class EventoResource extends Resource
 {
     protected static ?string $model = Evento::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::CalendarDateRange;
+
 
     protected static ?string $recordTitleAttribute = 'Evento';
 
