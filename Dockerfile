@@ -43,7 +43,6 @@ RUN chown -R unit:unit storage bootstrap/cache && chmod -R 775 storage bootstrap
 RUN composer install --prefer-dist --optimize-autoloader --no-interaction
 
 RUN php artisan migrate --force --no-interaction
-RUN php artisan db:seed PermissionSeeder --force --no-interaction
 
 RUN php artisan optimize:clear
 
