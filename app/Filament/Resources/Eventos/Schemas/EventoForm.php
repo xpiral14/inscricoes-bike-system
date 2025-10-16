@@ -34,6 +34,13 @@ class EventoForm
                                                             ->searchable()
                                                             ->required(),
 
+                                                        Select::make('estruturas')
+                                                            ->label('Estruturas')
+                                                            ->multiple()
+                                                            ->relationship('estruturas', 'name')
+                                                            ->preload()
+                                                        ,
+
                                                         TextInput::make('videoyoutube')
                                                             ->label('Código Vídeo Youtube')
                                                             ->maxLength(150)
