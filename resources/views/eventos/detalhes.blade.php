@@ -9,6 +9,8 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+    {{-- CDN para a biblioteca IMask.js para aplicar máscaras de input --}}
+    <script src="https://unpkg.com/imask@6.0.7/dist/imask.js"></script>
 
     <style>
         body {
@@ -23,6 +25,11 @@
 
         #modal-panel {
             transition: transform 0.3s ease-in-out;
+        }
+
+        /* Estilo para a borda de erro */
+        .border-red-500 {
+            border-color: #EF4444;
         }
     </style>
 </head>
@@ -159,7 +166,7 @@
         <div class="lg:col-span-1">
             <div class="sticky top-24 space-y-6">
                 <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                    <div class="mb-4">
+                    <div class="mb-4 max-h-[300px] overflow-y-auto">
 
                         <table class="w-full text-left border-collapse">
 
@@ -232,6 +239,7 @@
     </div>
 </footer>
 
+{{-- MODAL REESTRUTURADO --}}
 <div id="registration-modal" class="fixed inset-0 z-[100] hidden opacity-0" aria-labelledby="modal-title" role="dialog"
      aria-modal="true">
     <div id="modal-backdrop" class="fixed inset-0 bg-black/60"></div>
@@ -239,55 +247,33 @@
     <div id="modal-panel"
          class="fixed top-0 right-0 h-full w-full max-w-lg bg-white shadow-xl transform translate-x-full flex flex-col">
         <div class="flex items-center justify-between p-4 border-b border-gray-200">
-            <h2 id="modal-title" class="text-xl font-bold text-gray-900">Inscrição</h2>
+            <h2 id="modal-title" class="text-xl font-bold text-gray-900">Inscrição para {{$evento->titulo}}</h2>
             <button id="close-modal-button" class="p-1 rounded-full hover:bg-gray-200">
                 <i data-lucide="x" class="w-6 h-6 text-gray-600"></i>
             </button>
         </div>
 
         <div class="flex-grow p-6 overflow-y-auto">
-            <div id="step-1">
-                <h3 class="text-lg font-semibold text-gray-800">Passo 1: Quantos ingressos?</h3>
-                <div class="mt-4 p-4 border rounded-md bg-gray-50">
-                    <p class="font-semibold">2° Trilhão Brutas da Maniçoba - 2026</p>
-                    <p class="text-gray-600">Valor por ingresso: R$ 45,90</p>
-                </div>
-                <div class="mt-6 flex items-center justify-center gap-4">
-                    <button id="quantity-minus"
-                            class="p-2 border rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50">
-                        <i data-lucide="minus" class="w-5 h-5"></i>
-                    </button>
-                    <span id="quantity-display" class="text-2xl font-bold w-12 text-center">1</span>
-                    <button id="quantity-plus" class="p-2 border rounded-full bg-gray-200 hover:bg-gray-300">
-                        <i data-lucide="plus" class="w-5 h-5"></i>
-                    </button>
-                </div>
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Detalhes dos Participantes</h3>
+            <div id="participant-forms-container" class="space-y-6">
+                {{-- Formulários serão gerados aqui pelo JS --}}
             </div>
-
-            <div id="step-2" class="hidden">
-                <h3 class="text-lg font-semibold text-gray-800">Passo 2: Detalhes dos Participantes</h3>
-                <div id="participant-forms-container" class="mt-4 space-y-6">
-                </div>
-            </div>
+            <button id="add-participant-button"
+                    class="mt-6 w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                Adicionar Ingresso
+            </button>
         </div>
 
         <div class="p-4 bg-gray-50 border-t border-gray-200">
-            <div id="footer-step-1">
-                <button id="continue-button"
-                        class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md transition-colors">
-                    Continuar
-                </button>
+            <div class="flex justify-between items-center mb-4">
+                <p class="text-xl font-semibold text-gray-900">Valor Total:</p>
+                <p id="total-price-display" class="text-2xl font-bold text-blue-600">R$ 0,00</p>
             </div>
-            <div id="footer-step-2" class="hidden flex items-center gap-4">
-                <button id="back-button"
-                        class="w-1/3 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-md transition-colors">
-                    Voltar
-                </button>
-                <button id="finish-button"
-                        class="w-2/3 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md transition-colors">
-                    Finalizar Inscrição
-                </button>
-            </div>
+            <button id="finish-button"
+                    class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md transition-colors">
+                Finalizar Inscrição
+            </button>
         </div>
     </div>
 </div>
@@ -297,6 +283,44 @@
     // Inicializa os ícones da biblioteca Lucide
     lucide.createIcons();
 
+    // Dados das categorias para facilitar o cálculo
+    const eventCategories = {
+        @foreach($evento->categorias as $categoria)
+            {{$categoria->id}}: {
+            name: "{{$categoria->name}}",
+            price: {{number_format($categoria->price, 2, '.', '')}}
+        },
+        @endforeach
+    };
+
+    // Função para aplicar as máscaras
+    const applyMasks = (participantId) => {
+        const cpfInput = document.getElementById(`cpf-${participantId}`);
+        const celularInput = document.getElementById(`celular-${participantId}`);
+
+        if (cpfInput) {
+            IMask(cpfInput, {
+                mask: '000.000.000-00'
+            });
+        }
+
+        if (celularInput) {
+            // Máscara flexível para (00) 9000-0000 e (00) 9 0000-0000
+            const phoneMask = {
+                mask: [
+                    {
+                        mask: '(00) 0000-0000'
+                    },
+                    {
+                        mask: '(00) 90000-0000'
+                    }
+                ]
+            };
+            IMask(celularInput, phoneMask);
+        }
+    };
+
+
     // Garante que o script rode após o carregamento do DOM
     document.addEventListener('DOMContentLoaded', () => {
         // Seleção dos elementos do DOM
@@ -305,23 +329,12 @@
         const modalBackdrop = document.getElementById('modal-backdrop');
         const openModalButtons = document.querySelectorAll('.open-modal-button');
         const closeModalButton = document.getElementById('close-modal-button');
-
-        const step1 = document.getElementById('step-1');
-        const step2 = document.getElementById('step-2');
-        const footerStep1 = document.getElementById('footer-step-1');
-        const footerStep2 = document.getElementById('footer-step-2');
-
-        const continueButton = document.getElementById('continue-button');
-        const backButton = document.getElementById('back-button');
-        const finishButton = document.getElementById('finish-button');
-
-        const quantityDisplay = document.getElementById('quantity-display');
-        const quantityPlus = document.getElementById('quantity-plus');
-        const quantityMinus = document.getElementById('quantity-minus');
-
         const formsContainer = document.getElementById('participant-forms-container');
+        const finishButton = document.getElementById('finish-button');
+        const addParticipantButton = document.getElementById('add-participant-button');
+        const totalPriceDisplay = document.getElementById('total-price-display');
 
-        let ticketQuantity = 1;
+        let participantCount = 0; // Contador para rastrear os participantes
 
         const openModal = () => {
             modal.classList.remove('hidden');
@@ -329,6 +342,11 @@
                 modal.classList.remove('opacity-0');
                 modalPanel.classList.remove('translate-x-full');
             }, 10);
+            // Garante que haja pelo menos 1 formulário ao abrir
+            if (participantCount === 0) {
+                addParticipantForm();
+            }
+            updateTotalPrice();
         };
 
         const closeModal = () => {
@@ -336,93 +354,137 @@
             modalPanel.classList.add('translate-x-full');
             setTimeout(() => {
                 modal.classList.add('hidden');
-                showStep(1);
             }, 300);
         };
 
-        const updateQuantityDisplay = () => {
-            quantityDisplay.textContent = ticketQuantity;
-            quantityMinus.disabled = ticketQuantity <= 1;
+        const updateTotalPrice = () => {
+            let total = 0.00;
+            const categorySelectors = formsContainer.querySelectorAll('select[name="category[]"]');
+
+            categorySelectors.forEach(select => {
+                const categoryId = select.value;
+                if (categoryId && eventCategories[categoryId]) {
+                    total += eventCategories[categoryId].price;
+                }
+            });
+
+            // Formata o valor total para R$ X.XXX,XX
+            totalPriceDisplay.textContent = `R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
         };
 
-        const showStep = (step) => {
-            if (step === 1) {
-                step1.classList.remove('hidden');
-                footerStep1.classList.remove('hidden');
-                step2.classList.add('hidden');
-                footerStep2.classList.add('hidden');
-            } else if (step === 2) {
-                step1.classList.add('hidden');
-                footerStep1.classList.add('hidden');
-                step2.classList.remove('hidden');
-                footerStep2.classList.remove('hidden');
+        const toggleParticipantFields = (participantId, isVisible) => {
+            const participantForm = document.querySelector(`[data-participant="${participantId}"]`);
+            if (participantForm) {
+                const fieldsDiv = participantForm.querySelector('.participant-fields');
+                if (isVisible) {
+                    fieldsDiv.classList.remove('hidden');
+                } else {
+                    fieldsDiv.classList.add('hidden');
+                }
             }
         };
 
-        const generateParticipantForms = () => {
-            formsContainer.innerHTML = '';
-            for (let i = 1; i <= ticketQuantity; i++) {
-                const formHtml = `
-                        <div class="p-4 border rounded-md bg-gray-50" data-participant="${i}">
-                            <h4 class="font-semibold text-gray-800">Ingresso ${i}</h4>
-                                <div>
-                                    <label for="category-${i}" class="block text-sm font-medium text-gray-700">Categoria</label>
-                                    <select id="category-${i}" name="category[]" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
-                                        <option value="">Selecione a categoria</option>
-                                        <option value="cicloturismo">Cicloturismo - Diversão - R$ 45,90</option>
-                                    </select>
-                                </div>
-                            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label for="name-${i}" class="block text-sm font-medium text-gray-700">Nome Completo</label>
-                                    <input type="text" id="name-${i}" name="name[]" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Digite o nome completo">
-                                </div>
-                                <div>
-                                    <label for="cpf-${i}" class="block text-sm font-medium text-gray-700">CPF</label>
-                                    <input type="text" id="cpf-${i}" name="cpf[]" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="000.000.000-00">
-                                </div>
-                                <div>
-                                    <label for="cpf-${i}" class="block text-sm font-medium text-gray-700">Celular</label>
-                                    <input type="text" id="cpf-${i}" name="celular[]" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="000.000.000-00">
-                                </div>
-                                <div>
-                                    <label for="cpf-${i}" class="block text-sm font-medium text-gray-700">Data de nascimento</label>
-                                    <input type="date" id="cpf-${i}" name="nascimento[]" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="000.000.000-00">
-                                </div>
+        const removeParticipantForm = (participantId) => {
+            const formToRemove = document.querySelector(`[data-participant="${participantId}"]`);
+            if (formToRemove) {
+                formToRemove.remove();
+                participantCount--;
+                // Renumera os títulos e IDs dos formulários restantes
+                formsContainer.querySelectorAll('[data-participant]').forEach((form, index) => {
+                    const newIndex = index + 1;
+                    const oldId = form.getAttribute('data-participant');
+                    form.setAttribute('data-participant', newIndex);
+                    form.querySelector('.participant-title').textContent = `Ingresso ${newIndex}`;
 
+                    // Atualiza IDs e 'for' de labels para evitar conflitos
+                    form.querySelectorAll('[id^="category-"], [id^="name-"], [id^="cpf-"], [id^="celular-"], [id^="nascimento-"]').forEach(element => {
+                        const newId = element.id.replace(`-${oldId}`, `-${newIndex}`); // Usa o índice como parte do ID
+                        element.id = newId;
+                        const label = form.querySelector(`label[for="${element.id}"]`);
+                        if(label) label.setAttribute('for', newId);
+                    });
+
+                    // Atualiza o data-remove-id
+                    form.querySelector('.remove-participant-button').setAttribute('data-remove-id', newIndex);
+                });
+                updateTotalPrice();
+            }
+        };
+
+        const addParticipantForm = () => {
+            participantCount++;
+            const i = participantCount;
+
+            const formHtml = `
+                <div class="p-4 border rounded-md bg-gray-50 relative" data-participant="${i}">
+                    <button type="button" class="remove-participant-button absolute top-3 right-3 p-1 rounded-full text-gray-400 hover:text-red-600 transition-colors" data-remove-id="${i}" aria-label="Remover ingresso ${i}">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                    <h4 class="font-semibold text-gray-800 participant-title">Ingresso ${i}</h4>
+                    <div class="mt-2">
+                        <label for="category-${i}" class="block text-sm font-medium text-gray-700">Categoria</label>
+                        <select id="category-${i}" name="category[]" class="category-select mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                            <option value="">Selecione a categoria</option>
+                            @foreach($evento->categorias as $categoria)
+            <option value="{{$categoria->id}}" data-price="{{number_format($categoria->price, 2, '.', '')}}">{{$categoria->name}} (R$ {{number_format($categoria->price, 2, ',', '.')}})</option>
+                            @endforeach
+            </select>
+        </div>
+        <div class="participant-fields hidden"> <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="name-${i}" class="block text-sm font-medium text-gray-700">Nome Completo</label>
+                                <input type="text" id="name-${i}" name="name[]" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Digite o nome completo">
+                            </div>
+                            <div>
+                                <label for="cpf-${i}" class="block text-sm font-medium text-gray-700">CPF</label>
+                                <input type="text" id="cpf-${i}" name="cpf[]" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="000.000.000-00">
+                            </div>
+                            <div>
+                                <label for="celular-${i}" class="block text-sm font-medium text-gray-700">Celular</label>
+                                <input type="text" id="celular-${i}" name="celular[]" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="(00) 9 0000-0000">
+                            </div>
+                            <div>
+                                <label for="nascimento-${i}" class="block text-sm font-medium text-gray-700">Data de nascimento</label>
+                                <input type="date" id="nascimento-${i}" name="nascimento[]" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                             </div>
                         </div>
-                    `;
-                formsContainer.insertAdjacentHTML('beforeend', formHtml);
-            }
+                    </div>
+                </div>
+            `;
+            formsContainer.insertAdjacentHTML('beforeend', formHtml);
+            // Re-inicializa os ícones Lucide para o novo elemento
+            lucide.createIcons();
+
+            // *** Aplica as máscaras aos novos campos ***
+            applyMasks(i);
+
+            // Adiciona listeners para o select da categoria e o botão de remover
+            const newSelect = formsContainer.querySelector(`#category-${i}`);
+
+            // Listener para alternar os campos e atualizar o preço
+            newSelect.addEventListener('change', (e) => {
+                const isCategorySelected = !!e.target.value;
+                toggleParticipantFields(i, isCategorySelected);
+                updateTotalPrice();
+            });
+
+            const removeButton = formsContainer.querySelector(`button[data-remove-id="${i}"]`);
+            removeButton.addEventListener('click', (e) => {
+                // A remoção só é permitida se houver mais de um participante
+                if (participantCount > 1) {
+                    removeParticipantForm(e.currentTarget.getAttribute('data-remove-id'));
+                } else {
+                    alert('Pelo menos um ingresso é obrigatório.');
+                }
+            });
         };
 
-        // --- Event Listeners ---
+        // --- Event Listeners de Abertura/Fechamento e Adicionar Ingresso ---
 
         openModalButtons.forEach(button => button.addEventListener('click', openModal));
         closeModalButton.addEventListener('click', closeModal);
         modalBackdrop.addEventListener('click', closeModal);
-
-        quantityPlus.addEventListener('click', () => {
-            ticketQuantity++;
-            updateQuantityDisplay();
-        });
-
-        quantityMinus.addEventListener('click', () => {
-            if (ticketQuantity > 1) {
-                ticketQuantity--;
-                updateQuantityDisplay();
-            }
-        });
-
-        continueButton.addEventListener('click', () => {
-            generateParticipantForms();
-            showStep(2);
-        });
-
-        backButton.addEventListener('click', () => {
-            showStep(1);
-        });
+        addParticipantButton.addEventListener('click', addParticipantForm);
 
         // --- LÓGICA DE SUBMISSÃO PARA O BACKEND LARAVEL ---
         finishButton.addEventListener('click', async () => {
@@ -432,31 +494,61 @@
 
             // 1. Coleta e validação dos dados de cada formulário
             participantForms.forEach((pForm, index) => {
-                const i = index + 1;
-                const nameInput = pForm.querySelector(`#name-${i}`);
-                const cpfInput = pForm.querySelector(`#cpf-${i}`);
-                const categoryInput = pForm.querySelector(`#category-${i}`);
+                // Limpa estilos de erro antigos
+                pForm.querySelectorAll('input, select').forEach(input => input.classList.remove('border-red-500'));
 
-                // Remove estilos de erro antigos
-                [nameInput, cpfInput, categoryInput].forEach(input => input.classList.remove('border-red-500'));
-
-                const name = nameInput.value.trim();
-                const cpf = cpfInput.value.trim();
+                const categoryInput = pForm.querySelector('select[name="category[]"]');
                 const category = categoryInput.value;
 
-                if (!name || !cpf || !category) {
-                    hasError = true;
-                    // Adiciona borda vermelha aos campos vazios
-                    if (!name) nameInput.classList.add('border-red-500');
-                    if (!cpf) cpfInput.classList.add('border-red-500');
-                    if (!category) categoryInput.classList.add('border');
-                }
+                // Só tenta pegar os dados dos campos se a categoria estiver selecionada
+                if (category) {
+                    const nameInput = pForm.querySelector('input[name="name[]"]');
+                    const cpfInput = pForm.querySelector('input[name="cpf[]"]');
+                    const celularInput = pForm.querySelector('input[name="celular[]"]');
+                    const nascimentoInput = pForm.querySelector('input[name="nascimento[]"]');
 
-                participants.push({name, cpf, category});
+                    const name = nameInput.value.trim();
+                    const cpf = cpfInput.value.trim();
+                    const celular = celularInput.value.trim();
+                    const nascimento = nascimentoInput.value;
+
+                    // Validação de campos obrigatórios
+                    if (!name || !cpf || !celular || !nascimento) {
+                        hasError = true;
+                        // Adiciona borda vermelha aos campos vazios
+                        if (!name) nameInput.classList.add('border-red-500');
+                        if (!cpf) cpfInput.classList.add('border-red-500');
+                        if (!celular) celularInput.classList.add('border-red-500');
+                        if (!nascimento) nascimentoInput.classList.add('border-red-500');
+                    }
+
+                    // Validação de formato (opcional, mas bom para garantir)
+                    if (cpf.length !== 14) { // Verifica se a máscara de 000.000.000-00 foi preenchida
+                        hasError = true;
+                        cpfInput.classList.add('border-red-500');
+                    }
+                    if (celular.length < 14) { // Verifica se pelo menos o formato (00) 0000-0000 foi preenchido
+                        hasError = true;
+                        celularInput.classList.add('border-red-500');
+                    }
+
+
+                    participants.push({
+                        category,
+                        name,
+                        // Envia os valores sem formatação para o backend
+                        cpf: cpf.replace(/\D/g, ''),
+                        celular: celular.replace(/\D/g, ''),
+                        nascimento
+                    });
+                } else {
+                    hasError = true;
+                    categoryInput.classList.add('border-red-500');
+                }
             });
 
             if (hasError) {
-                alert('Por favor, preencha todos os campos destacados em todos os ingressos.');
+                alert('Por favor, selecione a categoria e preencha todos os campos corretamente em todos os ingressos.');
                 return; // Interrompe a execução se houver erro
             }
 
@@ -476,7 +568,6 @@
                         'Accept': 'application/json',
                     },
                     body: JSON.stringify({
-                        // Você pode passar o ID do evento aqui se necessário
                         evento_id: {{$evento->id}},
                         participants: participants
                     })
@@ -504,8 +595,10 @@
             }
         });
 
-        // Inicializa a exibição da quantidade
-        updateQuantityDisplay();
+        // Inicializa o primeiro formulário (ele estará no DOM mas escondido)
+        if (participantCount === 0) {
+            addParticipantForm();
+        }
     });
 </script>
 </body>
