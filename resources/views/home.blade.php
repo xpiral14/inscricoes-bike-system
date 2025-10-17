@@ -1,42 +1,8 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscrições.bike - Eventos de Ciclismo</title>
+@extends('app')
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+@section('title', 'Eventos de Ciclismo')
 
-    <style>
-        body { background-color: #F9FAFB; color: #1F2937; }
-        .swiper-pagination-bullet { background-color: rgba(0, 0, 0, 0.3); opacity: 1; }
-        .swiper-pagination-bullet-active { background-color: #3B82F6; }
-        .event-grid::-webkit-scrollbar { width: 8px; }
-        .event-grid::-webkit-scrollbar-track { background: #F3F4F6; }
-        .event-grid::-webkit-scrollbar-thumb { background: #9CA3AF; border-radius: 4px; }
-    </style>
-</head>
-<body class="antialiased">
-
-<header class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
-    <nav class="container mx-auto px-4 lg:px-8 py-4 flex justify-between items-center">
-        <a href="#" class="text-2xl font-bold text-blue-500">Inscrições<span class="text-gray-900">.bike</span></a>
-        <div class="hidden md:flex items-center space-x-6 text-sm font-medium">
-            <a href="#" class="text-gray-600 hover:text-blue-500 transition-colors">Início</a>
-            <a href="#" class="text-gray-600 hover:text-blue-500 transition-colors">Eventos</a>
-            <a href="#" class="text-gray-600 hover:text-blue-500 transition-colors">Organizadores</a>
-            <a href="#" class="text-gray-600 hover:text-blue-500 transition-colors">Contato</a>
-        </div>
-        <a href="#" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-md transition-colors">
-            Login / Cadastro
-        </a>
-    </nav>
-</header>
-
-<main>
+@section('content')
     {{-- Seção do Slider Principal --}}
     <section class="relative w-full container mx-auto mt-4 px-4 lg:px-8">
         <div class="swiper hero-swiper aspect-[210/297] md:aspect-video lg:aspect-[21/9] rounded-lg overflow-hidden">
@@ -177,47 +143,56 @@
             </div>
         </div>
     </section>
+@endsection
 
-</main>
+@section('styles')
+    {{-- Inclui o CSS específico do Swiper para o layout base --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <style>
+        .swiper-pagination-bullet { background-color: rgba(0, 0, 0, 0.3); opacity: 1; }
+        .swiper-pagination-bullet-active { background-color: #3B82F6; }
+        .event-grid::-webkit-scrollbar { width: 8px; }
+        .event-grid::-webkit-scrollbar-track { background: #F3F4F6; }
+        .event-grid::-webkit-scrollbar-thumb { background: #9CA3AF; border-radius: 4px; }
+    </style>
+@endsection
 
-<footer class="bg-white border-t border-gray-200">
-    <div class="container mx-auto px-4 lg:px-8 py-8 text-center text-gray-500 text-sm">
-        <p>&copy; {{ date('Y') }} Inscrições.bike - Todos os direitos reservados.</p>
-        <p class="mt-2">Desenvolvido e mantido por 2Gigantes Tecnologia Web.</p>
-    </div>
-</footer>
+@section('scripts')
+    {{-- O script do Swiper precisa vir antes do código de inicialização --}}
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
-<script>
-    // --- DATA SOURCE (Injetado pelo Laravel) ---
-    const eventsData = @json($allUpcomingEvents);
+    <script>
+        // --- DATA SOURCE (Injetado pelo Laravel) ---
+        const eventsData = @json($allUpcomingEvents);
 
-    // --- DOM ELEMENTS ---
-    const searchInput = document.getElementById('searchInput');
-    const stateTabsContainer = document.getElementById('stateTabs');
-    const eventGrid = document.getElementById('eventGrid');
-    const noResultsMessage = document.getElementById('noResults');
+        // --- DOM ELEMENTS ---
+        const searchInput = document.getElementById('searchInput');
+        const stateTabsContainer = document.getElementById('stateTabs');
+        const eventGrid = document.getElementById('eventGrid');
+        const noResultsMessage = document.getElementById('noResults');
 
-    // --- STATE MANAGEMENT ---
-    let activeState = 'ALL';
-    const tabs = ['ALL', ...@json($states)];
+        // --- STATE MANAGEMENT ---
+        let activeState = 'ALL';
+        // É importante usar a injeção Blade dentro do script:
+        const tabs = ['ALL', ...@json($states)];
 
-    // --- RENDER FUNCTIONS ---
-    function renderEvents(eventsToRender) {
-        eventGrid.innerHTML = '';
-        if (eventsToRender.length === 0) {
-            eventGrid.classList.add('hidden');
-            noResultsMessage.classList.remove('hidden');
-        } else {
-            eventGrid.classList.remove('hidden');
-            noResultsMessage.classList.add('hidden');
-            eventsToRender.forEach(event => {
-                const statusConfig = {
-                    open: { text: 'Inscrições Abertas', color: 'bg-blue-600' },
-                    closed: { text: 'Inscrições Encerradas', color: 'bg-red-600' }
-                };
-                const eventStatus = statusConfig[event.status] || { text: 'Status Indefinido', color: 'bg-gray-600' };
+        // --- RENDER FUNCTIONS ---
+        function renderEvents(eventsToRender) {
+            eventGrid.innerHTML = '';
+            if (eventsToRender.length === 0) {
+                eventGrid.classList.add('hidden');
+                noResultsMessage.classList.remove('hidden');
+            } else {
+                eventGrid.classList.remove('hidden');
+                noResultsMessage.classList.add('hidden');
+                eventsToRender.forEach(event => {
+                    const statusConfig = {
+                        open: { text: 'Inscrições Abertas', color: 'bg-blue-600' },
+                        closed: { text: 'Inscrições Encerradas', color: 'bg-red-600' }
+                    };
+                    const eventStatus = statusConfig[event.status] || { text: 'Status Indefinido', color: 'bg-gray-600' };
 
-                const card = `
+                    const card = `
                         <div class="bg-white rounded-lg overflow-hidden transition-shadow duration-300 ease-in-out shadow-md hover:shadow-xl border border-gray-200">
                             <img src="${event.image}" alt="Foto do evento ${event.name}" class="w-full h-40 object-cover">
                             <div class="p-4">
@@ -236,87 +211,88 @@
                             </div>
                         </div>
                     `;
-                eventGrid.innerHTML += card;
-            });
+                    eventGrid.innerHTML += card;
+                });
+            }
+            lucide.createIcons();
         }
-        lucide.createIcons();
-    }
 
-    function renderTabs() {
-        stateTabsContainer.innerHTML = '';
-        tabs.forEach(state => {
-            const isActive = state === activeState;
-            const tabClasses = isActive
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300';
+        function renderTabs() {
+            stateTabsContainer.innerHTML = '';
+            tabs.forEach(state => {
+                const isActive = state === activeState;
+                const tabClasses = isActive
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300';
 
-            const tab = `
+                const tab = `
                     <a href="#" data-state="${state}" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${tabClasses}">
                         ${state === 'ALL' ? 'Todos' : state}
                     </a>
                 `;
-            stateTabsContainer.innerHTML += tab;
+                stateTabsContainer.innerHTML += tab;
+            });
+        }
+
+        // --- FILTERING LOGIC ---
+        function filterAndDisplayEvents() {
+            const searchQuery = searchInput.value.toLowerCase();
+
+            let filteredByState = eventsData;
+            if (activeState !== 'ALL') {
+                filteredByState = eventsData.filter(event => event.state === activeState);
+            }
+
+            let finalFilteredEvents = filteredByState;
+            if (searchQuery) {
+                finalFilteredEvents = filteredByState.filter(event => {
+                        return event.name.toLowerCase().includes(searchQuery) || event.state.toLowerCase().includes(searchQuery) || event.cidade.toLowerCase().includes(searchQuery);
+                    }
+                );
+            }
+
+            finalFilteredEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            // Limit to 8 events only on the initial "ALL" load without search
+            if (activeState === 'ALL' && !searchQuery) {
+                finalFilteredEvents = finalFilteredEvents.slice(0, 8);
+            }
+
+            renderEvents(finalFilteredEvents);
+        }
+
+        // --- EVENT LISTENERS ---
+        stateTabsContainer.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = e.target.closest('.tab-link');
+            if (target) {
+                activeState = target.dataset.state;
+                searchInput.value = '';
+                renderTabs();
+                filterAndDisplayEvents();
+            }
         });
-    }
 
-    // --- FILTERING LOGIC ---
-    function filterAndDisplayEvents() {
-        const searchQuery = searchInput.value.toLowerCase();
+        searchInput.addEventListener('input', () => {
+            filterAndDisplayEvents();
+        });
 
-        let filteredByState = eventsData;
-        if (activeState !== 'ALL') {
-            filteredByState = eventsData.filter(event => event.state === activeState);
-        }
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const swiper = new Swiper('.hero-swiper', {
+                loop: true,
+                autoplay: { delay: 5000, disableOnInteraction: false },
+                effect: 'fade',
+                fadeEffect: { crossFade: true },
+                pagination: { el: '.swiper-pagination', clickable: true },
+                navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+            });
 
-        let finalFilteredEvents = filteredByState;
-        if (searchQuery) {
-            finalFilteredEvents = filteredByState.filter(event => {
-                    return event.name.toLowerCase().includes(searchQuery) || event.state.toLowerCase().includes(searchQuery) || event.cidade.toLowerCase().includes(searchQuery);
-                }
-            );
-        }
-
-        finalFilteredEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-        // Limit to 8 events only on the initial "ALL" load without search
-        if (activeState === 'ALL' && !searchQuery) {
-            finalFilteredEvents = finalFilteredEvents.slice(0, 8);
-        }
-
-        renderEvents(finalFilteredEvents);
-    }
-
-    // --- EVENT LISTENERS ---
-    stateTabsContainer.addEventListener('click', (e) => {
-        e.preventDefault();
-        const target = e.target.closest('.tab-link');
-        if (target) {
-            activeState = target.dataset.state;
-            searchInput.value = '';
             renderTabs();
             filterAndDisplayEvents();
-        }
-    });
-
-    searchInput.addEventListener('input', () => {
-        filterAndDisplayEvents();
-    });
-
-    // --- INITIALIZATION ---
-    document.addEventListener('DOMContentLoaded', () => {
-        const swiper = new Swiper('.hero-swiper', {
-            loop: true,
-            autoplay: { delay: 5000, disableOnInteraction: false },
-            effect: 'fade',
-            fadeEffect: { crossFade: true },
-            pagination: { el: '.swiper-pagination', clickable: true },
-            navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+            // A chamada lucide.createIcons() no app.blade.php já é suficiente, mas mantemos aqui para garantir
+            // que ícones adicionados dinamicamente (na renderEvents) sejam carregados.
+            // O lucide.createIcons() inicial no DOMContentLoaded é removido, pois já está no app.blade.php
         });
-
-        renderTabs();
-        filterAndDisplayEvents();
-        lucide.createIcons();
-    });
-</script>
-</body>
-</html>
+    </script>
+@endsection
