@@ -6,6 +6,7 @@ use App\Filament\Resources\Eventos\Pages\CreateEvento;
 use App\Filament\Resources\Eventos\Pages\EditEvento;
 use App\Filament\Resources\Eventos\Pages\ListEventos;
 use App\Filament\Resources\Eventos\Pages\ViewEvento;
+use App\Filament\Resources\Eventos\RelationManagers\CuponsRelationManager;
 use App\Filament\Resources\Eventos\RelationManagers\InscricoesRelationManager;
 use App\Filament\Resources\Eventos\RelationManagers\PagamentosRelationManager;
 use App\Filament\Resources\Eventos\Schemas\EventoForm;
@@ -53,7 +54,8 @@ class EventoResource extends Resource
     public static function getRelations(): array
     {
         return [
-            InscricoesRelationManager::make()
+            InscricoesRelationManager::make(),
+            CuponsRelationManager::make()
         ];
     }
 
