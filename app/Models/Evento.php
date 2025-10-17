@@ -70,4 +70,9 @@ class Evento extends Model
     {
         return $this->belongsToMany(Estrutura::class, EventoEstrutura::class, 'event', 'structure');
     }
+
+    public function cupons()
+    {
+        return $this->hasMany(EventoCupom::class, 'evento');
+    }
 }

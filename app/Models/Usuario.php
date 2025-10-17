@@ -1,13 +1,15 @@
 <?php
 
 namespace App\Models;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class Usuario extends Model
+class Usuario extends Authenticatable
 {
-
+    use HasApiTokens;
     protected $table = 'tb_usuarios';
 
     public $timestamps = false;
