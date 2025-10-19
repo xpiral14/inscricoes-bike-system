@@ -170,7 +170,8 @@
 
 @section('modal')
     {{-- MODAL REESTRUTURADO --}}
-    <div id="registration-modal" class="fixed inset-0 z-[100] hidden opacity-0" aria-labelledby="modal-title" role="dialog"
+    <div id="registration-modal" class="fixed inset-0 z-[100] hidden opacity-0" aria-labelledby="modal-title"
+         role="dialog"
          aria-modal="true">
         <div id="modal-backdrop" class="fixed inset-0 bg-black/60"></div>
 
@@ -190,16 +191,19 @@
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Passo 1: Login ou Cadastro</h3>
 
                     {{-- FORMULÁRIO DE LOGIN (CPF / DATA NASC.) --}}
-                    <div id="login-form-container" class="bg-white p-4 rounded-lg shadow-md border border-gray-200 mb-6">
+                    <div id="login-form-container"
+                         class="bg-white p-4 rounded-lg shadow-md border border-gray-200 mb-6">
                         <h4 class="font-bold text-gray-900 mb-4">Já sou cliente</h4>
                         <form id="login-form">
                             <div class="mb-4">
                                 <label for="login-cpf" class="block text-sm font-medium text-gray-700">CPF</label>
                                 <input type="text" id="login-cpf" name="cpf" required
-                                       class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="000.000.000-00">
+                                       class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                       placeholder="000.000.000-00">
                             </div>
                             <div class="mb-6">
-                                <label for="login-nascimento" class="block text-sm font-medium text-gray-700">Data de Nascimento</label>
+                                <label for="login-nascimento" class="block text-sm font-medium text-gray-700">Data de
+                                    Nascimento</label>
                                 <input type="date" id="login-nascimento" name="nascimento" required
                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                             </div>
@@ -220,27 +224,35 @@
                     </div>
 
                     {{-- FORMULÁRIO DE REGISTRO RÁPIDO (ESCONDIDO) --}}
-                    <div id="register-form-container" class="bg-white p-4 rounded-lg shadow-md border border-gray-200 hidden">
+                    <div id="register-form-container"
+                         class="bg-white p-4 rounded-lg shadow-md border border-gray-200 hidden">
                         <h4 class="font-bold text-gray-900 mb-4">Cadastro Rápido</h4>
                         <form id="register-form">
                             <div class="mb-4">
-                                <label for="register-name" class="block text-sm font-medium text-gray-700">Nome Completo</label>
+                                <label for="register-name" class="block text-sm font-medium text-gray-700">Nome
+                                    Completo</label>
                                 <input type="text" id="register-name" name="name" required
-                                       class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Nome completo">
+                                       class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                       placeholder="Nome completo">
                             </div>
                             <div class="mb-4">
-                                <label for="register-email" class="block text-sm font-medium text-gray-700">E-mail</label>
+                                <label for="register-email"
+                                       class="block text-sm font-medium text-gray-700">E-mail</label>
                                 <input type="email" id="register-email" name="email" required
-                                       class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="seu.email@exemplo.com">
+                                       class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                       placeholder="seu.email@exemplo.com">
                             </div>
                             <div class="grid grid-cols-2 gap-4 mb-4">
                                 <div>
-                                    <label for="register-cpf" class="block text-sm font-medium text-gray-700">CPF</label>
+                                    <label for="register-cpf"
+                                           class="block text-sm font-medium text-gray-700">CPF</label>
                                     <input type="text" id="register-cpf" name="cpf" required
-                                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="000.000.000-00">
+                                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                           placeholder="000.000.000-00">
                                 </div>
                                 <div>
-                                    <label for="register-nascimento" class="block text-sm font-medium text-gray-700">Data de Nascimento</label>
+                                    <label for="register-nascimento" class="block text-sm font-medium text-gray-700">Data
+                                        de Nascimento</label>
                                     <input type="date" id="register-nascimento" name="nascimento" required
                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                 </div>
@@ -332,14 +344,14 @@
             const celularInput = document.getElementById(`celular-${participantId}`);
 
             if (cpfInput) {
-                IMask(cpfInput, { mask: '000.000.000-00' });
+                IMask(cpfInput, {mask: '000.000.000-00'});
             }
 
             if (celularInput) {
                 const phoneMask = {
                     mask: [
-                        { mask: '(00) 0000-0000' },
-                        { mask: '(00) 90000-0000' }
+                        {mask: '(00) 0000-0000'},
+                        {mask: '(00) 90000-0000'}
                     ]
                 };
                 IMask(celularInput, phoneMask);
@@ -350,11 +362,59 @@
             const loginCpf = document.getElementById('login-cpf');
             const registerCpf = document.getElementById('register-cpf');
 
-            if (loginCpf) IMask(loginCpf, { mask: '000.000.000-00' });
-            if (registerCpf) IMask(registerCpf, { mask: '000.000.000-00' });
+            if (loginCpf) IMask(loginCpf, {mask: '000.000.000-00'});
+            if (registerCpf) IMask(registerCpf, {mask: '000.000.000-00'});
         };
 
-        // REMOVIDO: A função getCsrfCookie, pois a meta tag CSRF de sessão é suficiente em apps SSR.
+        // NOVA FUNÇÃO para buscar e preencher as cidades
+        const fetchCities = async (estadoSelect, cidadeSelect) => {
+            const estado = estadoSelect.value;
+            cidadeSelect.innerHTML = '<option value="">Carregando cidades...</option>';
+            cidadeSelect.disabled = true;
+
+            if (!estado) {
+                cidadeSelect.innerHTML = '<option value="">Selecione a UF primeiro</option>';
+                cidadeSelect.disabled = false;
+                return;
+            }
+
+            try {
+                // Rota da API para buscar cidades por estado
+                const url = `/api/cidades/${estado}`;
+
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Falha ao carregar as cidades.');
+                }
+
+                const cidades = await response.json();
+
+                cidadeSelect.innerHTML = '<option value="">Selecione a cidade</option>'; // Limpa e adiciona o placeholder
+
+                if (cidades.length > 0) {
+                    cidades.forEach(cidade => {
+                        const option = document.createElement('option');
+                        option.value = cidade.nome; // Supondo que a coluna do nome da cidade seja 'nome'
+                        option.textContent = cidade.nome;
+                        cidadeSelect.appendChild(option);
+                    });
+                } else {
+                    cidadeSelect.innerHTML = '<option value="">Nenhuma cidade encontrada</option>';
+                }
+                cidadeSelect.disabled = false;
+
+            } catch (error) {
+                console.error('Erro ao buscar cidades:', error);
+                cidadeSelect.innerHTML = '<option value="">Erro ao carregar</option>';
+                cidadeSelect.disabled = false;
+            }
+        };
 
 
         // Garante que o script rode após o carregamento do DOM
@@ -469,7 +529,10 @@
                     }
                 });
 
-                totalPriceDisplay.textContent = `R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                totalPriceDisplay.textContent = `R$ ${total.toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                })}`;
             };
 
             const toggleParticipantFields = (participantId, isVisible) => {
@@ -494,11 +557,11 @@
                         const oldId = form.getAttribute('data-participant');
                         form.setAttribute('data-participant', newIndex);
                         form.querySelector('.participant-title').textContent = `Ingresso ${newIndex}`;
-                        form.querySelectorAll('[id^="category-"], [id^="name-"], [id^="cpf-"], [id^="celular-"], [id^="nascimento-"]').forEach(element => {
+                        form.querySelectorAll('[id^="category-"], [id^="name-"], [id^="cpf-"], [id^="celular-"], [id^="nascimento-"], [id^="estado-"], [id^="cidade-"]').forEach(element => {
                             const newId = element.id.replace(`-${oldId}`, `-${newIndex}`);
                             element.id = newId;
                             const label = form.querySelector(`label[for="${element.id}"]`);
-                            if(label) label.setAttribute('for', newId);
+                            if (label) label.setAttribute('for', newId);
                         });
                         form.querySelector('.remove-participant-button').setAttribute('data-remove-id', newIndex);
                     });
@@ -543,6 +606,21 @@
                                 <label for="nascimento-${i}" class="block text-sm font-medium text-gray-700">Data de nascimento</label>
                                 <input type="date" id="nascimento-${i}" name="nascimento[]" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                             </div>
+                            <div class="mt-2">
+                                        <label for="estado-${i}" class="block text-sm font-medium text-gray-700">Estado</label>
+                                        <select id="estado-${i}" name="estado[]" class="estado-select mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                            <option value="">Selecione a UF</option>
+                                            @foreach($estados as $estado)
+                <option value="{{$estado->nome}}">{{strtoupper($estado->nome)}}</option>
+                                            @endforeach
+                </select>
+            </div>
+            <div class="mt-2">
+                        <label for="cidade-${i}" class="block text-sm font-medium text-gray-700">Cidade</label>
+                                        <select id="cidade-${i}" name="cidade[]" class="cidade-select mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                            <option value="">Selecione a UF primeiro</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -550,6 +628,19 @@
                 formsContainer.insertAdjacentHTML('beforeend', formHtml);
                 lucide.createIcons();
                 applyMasks(i);
+
+                // Referências aos novos selects de Estado e Cidade
+                const estadoSelect = formsContainer.querySelector(`#estado-${i}`);
+                const cidadeSelect = formsContainer.querySelector(`#cidade-${i}`);
+
+                // Inicializa o campo de cidade (estado inicial desabilitado com mensagem)
+                cidadeSelect.disabled = true;
+
+                // Listener para o select de Estado
+                estadoSelect.addEventListener('change', () => {
+                    fetchCities(estadoSelect, cidadeSelect);
+                });
+
 
                 const newSelect = formsContainer.querySelector(`#category-${i}`);
                 newSelect.addEventListener('change', (e) => {
@@ -577,28 +668,36 @@
                     pForm.querySelectorAll('input, select').forEach(input => input.classList.remove('border-red-500'));
 
                     const categoryInput = pForm.querySelector('select[name="category[]"]');
+                    const nameInput = pForm.querySelector('input[name="name[]"]');
+                    const cpfInput = pForm.querySelector('input[name="cpf[]"]');
+                    const celularInput = pForm.querySelector('input[name="celular[]"]');
+                    const nascimentoInput = pForm.querySelector('input[name="nascimento[]"]');
+                    const estadoInput = pForm.querySelector('select[name="estado[]"]');
+                    const cidadeInput = pForm.querySelector('select[name="cidade[]"]');
+
                     const category = categoryInput.value;
 
                     if (category) {
-                        const nameInput = pForm.querySelector('input[name="name[]"]');
-                        const cpfInput = pForm.querySelector('input[name="cpf[]"]');
-                        const celularInput = pForm.querySelector('input[name="celular[]"]');
-                        const nascimentoInput = pForm.querySelector('input[name="nascimento[]"]');
-
                         const name = nameInput.value.trim();
                         const cpf = cpfInput.value.trim();
                         const celular = celularInput.value.trim();
                         const nascimento = nascimentoInput.value;
+                        const estado = estadoInput.value;
+                        const cidade = cidadeInput.value;
+
 
                         const cleanedCpf = cpf.replace(/\D/g, '');
                         const cleanedCelular = celular.replace(/\D/g, '');
 
-                        if (!name || !cpf || !celular || !nascimento || cleanedCpf.length !== 11 || cleanedCelular.length < 10) {
+                        // Validação: Verifique todos os campos obrigatórios
+                        if (!name || !cpf || !celular || !nascimento || cleanedCpf.length !== 11 || cleanedCelular.length < 10 || !estado || !cidade) {
                             hasError = true;
                             if (!name) nameInput.classList.add('border-red-500');
                             if (!cpf || cleanedCpf.length !== 11) cpfInput.classList.add('border-red-500');
                             if (!celular || cleanedCelular.length < 10) celularInput.classList.add('border-red-500');
                             if (!nascimento) nascimentoInput.classList.add('border-red-500');
+                            if (!estado) estadoInput.classList.add('border-red-500');
+                            if (!cidade) cidadeInput.classList.add('border-red-500');
                         }
 
                         participantsData.push({
@@ -607,6 +706,8 @@
                             cpf: cleanedCpf,
                             celular: cleanedCelular,
                             nascimento,
+                            estado, // Adicionado estado
+                            cidade, // Adicionado cidade
                             price: eventCategories[category] ? eventCategories[category].price : 0,
                             category_name: eventCategories[category] ? eventCategories[category].name : 'N/A'
                         });
@@ -629,7 +730,11 @@
                         <div class="text-sm text-gray-700 space-y-1">
                             <p><strong>Nome:</strong> ${p.name}</p>
                             <p><strong>CPF:</strong> ${p.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')}</p>
-                            <p><strong>Valor:</strong> R$ ${p.price.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                            <p><strong>Localidade:</strong> ${p.cidade} (${p.estado})</p>
+                            <p><strong>Valor:</strong> R$ ${p.price.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    })}</p>
                         </div>
                     </div>
                 `;
@@ -690,7 +795,7 @@
                             'X-CSRF-TOKEN': csrfToken,
                             'Accept': 'application/json',
                         },
-                        body: JSON.stringify({ cpf: cpf, nascimento: nascimento })
+                        body: JSON.stringify({cpf: cpf, nascimento: nascimento})
                     });
 
                     if (response.ok) {
@@ -736,7 +841,7 @@
                             'X-CSRF-TOKEN': csrfToken,
                             'Accept': 'application/json',
                         },
-                        body: JSON.stringify({ name: name, email: email, cpf: cpf, nascimento: nascimento })
+                        body: JSON.stringify({name: name, email: email, cpf: cpf, nascimento: nascimento})
                     });
 
                     if (response.ok) {
@@ -780,7 +885,9 @@
                     name: p.name,
                     cpf: p.cpf,
                     celular: p.celular,
-                    nascimento: p.nascimento
+                    nascimento: p.nascimento,
+                    estado: p.estado,
+                    cidade: p.cidade,
                 }));
 
                 try {
