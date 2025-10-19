@@ -137,6 +137,14 @@
                             para {{$evento->inicioEvento()->format('d/m/Y \à\s H:i')}}</p>
                     </div>
                 </div>
+                @if($publicidade)
+                    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                        <img src="{{\Illuminate\Support\Facades\Storage::disk('public')->url("public/$publicidade->ds_imagem")}}" alt="{{$publicidade->nm_titulo}}"/>
+                        @if($publicidade->ds_script)
+                            {{$publicidade->ds_script}}
+                        @endif
+                    </div>
+                @endif
                 <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
                     <h3 class="text-xl font-bold text-gray-900 mb-4">Incluso neste evento</h3>
                     <ul class="space-y-3 text-gray-700">
