@@ -54,6 +54,9 @@ class EventoForm
                                            ->collapsible()
                                            ->columns(3)
                                            ->schema([
+                                                        TextInput::make('localevento')
+                                                            ->label('Concentração')
+                                                            ->maxLength(5),
                                                         TextInput::make('horaevento')
                                                             ->label('Hora Inicial; Ex: 7:00')
                                                             ->placeholder('HH:MM')
@@ -96,6 +99,9 @@ class EventoForm
                                                                           1 => 'Sim',
                                                                       ])
                                                             ->default(0),
+                                                        Select::make('kit')
+                                                            ->label('Possui Kit?')
+                                                            ->boolean('Sim', 'Não')
                                                     ]),
 
                                        // --- 3. SEÇÃO: CONFIGURAÇÕES DE VALORES ---
