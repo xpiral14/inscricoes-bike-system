@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Evento;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 // Supondo que você tenha um Model chamado Evento
 // use App\Models\Evento;
 
@@ -21,12 +23,12 @@ class EventoController extends Controller
         // return view('eventos.detalhes', ['evento' => $evento]);
 
         // Como ainda não temos o model, apenas retornamos a view:
-        return view('eventos.detalhes', ['evento' => $evento]);
+        return view('eventos.detalhes', ['evento' => $evento, 'estados' => new LocationController()->listaDeEstados()]);
     }
 
     // Deixe o outro método pronto para a Parte 3
     public function processarInscricao(Request $request)
     {
-        // A mágica acontecerá aqui
+        return response()->json([['id' => Auth::id()]]);
     }
 }
