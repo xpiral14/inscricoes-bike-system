@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Evento;
+use App\Models\Publicidade;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,7 +24,19 @@ class EventoController extends Controller
         // return view('eventos.detalhes', ['evento' => $evento]);
 
         // Como ainda não temos o model, apenas retornamos a view:
-        return view('eventos.detalhes', ['evento' => $evento, 'estados' => new LocationController()->listaDeEstados()]);
+        $publicidades = Publicidade::query()->where('cd_area', 9)->get();
+
+        if ($publicidades->isNotEmpty()) {
+            $publicidade = $publicidades->random();
+        } else {
+            $publicidade = null;
+        }
+
+        return view('eventos.detalhes', [
+            'evento'      => $evento,
+            'estados'     => new LocationController()->listaDeEstados(),
+            'publicidade' => $publicidade
+        ]);
     }
 
     // Deixe o outro método pronto para a Parte 3
