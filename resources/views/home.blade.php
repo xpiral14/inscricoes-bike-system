@@ -3,30 +3,34 @@
 @section('title', 'Eventos de Ciclismo')
 
 @section('content')
-    {{-- Seção do Slider Principal --}}
+    {{-- Seção de Banner Principal (Hero Block) COM IMAGEM DE FUNDO - Foco Amplo --}}
     <section class="relative w-full container mx-auto mt-4 px-4 lg:px-8">
-        <div class="swiper hero-swiper aspect-[210/297] md:aspect-video lg:aspect-[21/9] rounded-lg overflow-hidden">
-            <div class="swiper-wrapper">
-                @forelse($featuredEvents as $event)
-                    <div class="swiper-slide relative">
-                        {{-- Assumindo que os banners estão em public/storage/banners --}}
-                        <img src="{{ asset($event->banner) }}" alt="Banner do evento {{ $event->titulo }}" class="h-full mx-auto">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                        <div class="absolute bottom-0 left-0 p-8 text-white">
-                            <h2 class="text-3xl lg:text-5xl font-bold mb-2">{{ $event->titulo }}</h2>
-                            <p class="text-lg mb-4">{{ $event->dataevento->translatedFormat('d \d\e F, Y') }} - {{ $event->cidade }} / {{ $event->uf }}</p>
-                            <a href="#" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md transition-colors">Inscreva-se Já</a>
-                        </div>
+        <div class="bg-blue-600 rounded-lg overflow-hidden relative p-8 lg:p-16 text-white shadow-xl bg-cover bg-center"
+             style="background-image: url('{{ asset('images/banner-hero.jpg')  }}');">
+
+            {{-- Camada de Overlay para escurecer o fundo e aumentar a legibilidade do texto --}}
+            <div class="absolute inset-0 bg-blue-900/60 rounded-lg"></div>
+
+            <div class="relative z-10 max-w-4xl mx-auto text-center">
+                <h1 class="text-4xl lg:text-6xl font-extrabold mb-4 leading-tight">
+                    Encontre sua Próxima Grande Prova Esportiva
+                </h1>
+                <p class="text-xl lg:text-2xl font-light mb-8 opacity-90">
+                    Inscrições fáceis e rápidas para eventos esportivos de todos os tipos na sua região.
+                </p>
+
+                {{-- Replicando o campo de busca aqui para tornar o Hero interativo --}}
+                <div class="relative w-full max-w-xl mx-auto">
+                        <input type="text" id="heroSearchInput" placeholder="Pesquisar provas, cidades ou estados..." class="w-full pl-12 pr-4 py-3 text-lg bg-white text-gray-900 border-2 border-transparent rounded-full focus:ring-4 focus:ring-blue-300 focus:border-blue-700 shadow-lg transition" onfocus="document.getElementById('searchInput').focus();">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i data-lucide="search" class="w-6 h-6 text-gray-500"></i>
                     </div>
-                @empty
-                    <div class="swiper-slide relative flex items-center justify-center bg-gray-200">
-                        <p class="text-gray-600">Nenhum evento em destaque no momento.</p>
-                    </div>
-                @endforelse
+                </div>
+
+                <a href="#eventGrid" class="mt-8 inline-block text-sm font-semibold text-white underline opacity-70 hover:opacity-100 transition-opacity">
+                    Ou navegue pelos próximos eventos abaixo <i data-lucide="arrow-down" class="w-4 h-4 ml-1 inline-block"></i>
+                </a>
             </div>
-            <div class="swiper-pagination"></div>
-            <div class="swiper-button-prev text-gray-800"></div>
-            <div class="swiper-button-next text-gray-800"></div>
         </div>
     </section>
 
@@ -111,7 +115,7 @@
                             <p class="text-sm text-gray-500">{{ $event->cidade }}/{{ $event->uf }}</p>
                         </div>
                     </div>
-                    <a href="#" class="w-full sm:w-auto text-center block bg-gray-200 text-gray-800 font-semibold py-2 px-6 rounded-md text-sm transition-colors hover:bg-gray-300">Ver Detalhes</a>
+                    <a href="{{route('eventos.show', ['evento' => $event->url])}}" class="w-full sm:w-auto text-center block bg-gray-200 text-gray-800 font-semibold py-2 px-6 rounded-md text-sm transition-colors hover:bg-gray-300">Ver Detalhes</a>
                 </div>
             @empty
                 <div class="bg-white border border-gray-200 p-4 rounded-lg text-center">
@@ -194,7 +198,7 @@
 
                     const card = `
                         <div class="bg-white rounded-lg overflow-hidden transition-shadow duration-300 ease-in-out shadow-md hover:shadow-xl border border-gray-200">
-                            <img src="${event.image}" alt="Foto do evento ${event.name}" class="w-full h-40 object-cover">
+                            <img src="${event.image}" alt="Foto do evento ${event.name}" class="w-full h-[330px] object-cover" >
                             <div class="p-4">
                                 <h3 class="font-bold text-lg text-gray-900 mb-2 truncate">${event.name}</h3>
                                 <div class="flex items-center text-sm text-gray-500 mb-2">
