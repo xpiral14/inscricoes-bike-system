@@ -11,7 +11,5 @@ Route::get('/estados', [\App\Http\Controllers\LocationController::class, 'listaD
 Route::post('/login', [\App\Http\Controllers\SessionController::class, 'login'])->name('api.login');
 Route::post('/register', [\App\Http\Controllers\SessionController::class, 'register'])->name('api.register');
 
-Route::group(['middleware' => ['auth:sanctum']], function () {
-    Route::post('/inscricoes', [\App\Http\Controllers\EventoController::class, 'processarInscricao'])->name('inscricoes.store');
-});
+Route::post('/inscricoes', [\App\Http\Controllers\EventoController::class, 'processarInscricao'])->name('inscricoes.store');
 
