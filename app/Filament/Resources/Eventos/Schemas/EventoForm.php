@@ -7,6 +7,12 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Repeater;
+
+// 👈 Adicionado o Repeater
+use Filament\Forms\Components\Group;
+
+// 👈 Adicionado o Group
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -44,8 +50,7 @@ class EventoForm
                                                         TextInput::make('videoyoutube')
                                                             ->label('Código Vídeo Youtube')
                                                             ->maxLength(150)
-                                                            ->default(' ')
-                                                            ->required(),
+                                                            ->default('_'),
                                                     ]),
 
                                        // --- 2. SEÇÃO: DATAS E LOGÍSTICA ---
@@ -55,8 +60,13 @@ class EventoForm
                                            ->columns(3)
                                            ->schema([
                                                         TextInput::make('localevento')
-                                                            ->label('Concentração')
-                                                            ->maxLength(5),
+                                                            ->label('Concentração'),
+                                                        TextInput::make('limiteinscritos')
+                                                            ->label('Limite de inscrições pagas')
+                                                            ->numeric()
+                                                            ->minValue(1)
+                                                            ->required()
+                                                        ,
                                                         TextInput::make('horaevento')
                                                             ->label('Hora Inicial; Ex: 7:00')
                                                             ->placeholder('HH:MM')
@@ -222,7 +232,7 @@ class EventoForm
 
                                        // --- 5. SEÇÃO: DETALHES E CONTEÚDO ---
                                        Section::make('Detalhes e Conteúdo')
-                                           ->description('Descrições longas e mídias visuais.')
+                                           ->description('Descrições longas, mídias visuais')
                                            ->collapsible()
                                            ->schema([
                                                         RichEditor::make('descricao')
@@ -242,6 +252,67 @@ class EventoForm
                                                             ->rows(5)
                                                             ->columnSpanFull(),
                                                     ]),
+
+                                       Section::make('Categorias')
+                                           ->description('Categorias do evento.')
+                                           ->collapsible()
+                                           ->schema([
+                                                        Repeater::make('categorias')
+                                                            ->label('Categorias do Evento')
+                                                            ->relationship('categorias') // Assumindo que você tem um relacionamento 'categorias' no seu modelo Evento
+                                                            ->schema([
+                                                                         \Filament\Schemas\Components\Group::make()
+                                                                             ->columns(4)
+                                                                             ->schema([
+                                                                                          TextInput::make('name')
+                                                                                              ->label('Nome da Categoria')
+                                                                                              ->required()
+                                                                                              ->maxLength(145),
+
+                                                                                          TextInput::make('price')
+                                                                                              ->label('Preço')
+                                                                                              ->required()
+                                                                                              ->currencyMask('.', ',')
+                                                                                              ->numeric()
+                                                                                              ->prefix('R$')
+                                                                                              ->default(0),
+
+                                                                                          TextInput::make('anoInicial')
+                                                                                              ->label('Ano Nasc. Inicial')
+                                                                                              ->numeric()
+                                                                                              ->minValue(1900)
+                                                                                              ->maxValue(2099)
+                                                                                              ->required()
+                                                                                              ->default(1949),
+
+                                                                                          TextInput::make('anoFinal')
+                                                                                              ->label('Ano Nasc. Final')
+                                                                                              ->numeric()
+                                                                                              ->minValue(1900)
+                                                                                              ->maxValue(2099)
+                                                                                              ->required()
+                                                                                              ->default(2013),
+                                                                                      ]),
+
+                                                                         Textarea::make('description')
+                                                                             ->label('Descrição da Categoria')
+                                                                             ->rows(2),
+
+                                                                         Toggle::make('permitirDupla')
+                                                                             ->label('Permitir Dupla?')
+                                                                             ->inline()
+                                                                             ->default(false),
+                                                                         Toggle::make('ativo')
+                                                                             ->label('Ativo?')
+                                                                             ->default(true)
+                                                                             ->inline(false),
+
+                                                                     ])
+                                                            ->defaultItems(1)
+                                                            ->createItemButtonLabel('Adicionar Categoria')
+                                                            ->columns(1)
+                                                            ->columnSpanFull()
+                                                    ])
                                    ])->columns(1);
     }
 }
