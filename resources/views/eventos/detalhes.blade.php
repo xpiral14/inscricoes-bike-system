@@ -338,7 +338,8 @@
             @foreach($evento->categorias as $categoria)
                 {{$categoria->id}}: {
                 name: "{{$categoria->name}}",
-                price: {{number_format($categoria->price, 2, '.', '')}}
+                price: {{number_format($categoria->price, 2, '.', '')}},
+                permitirDupla: {{(int) $categoria->permitirDupla}}
             },
             @endforeach
         };
@@ -348,21 +349,28 @@
 
         // Funções de Máscara (Mantidas)
         const applyMasks = (participantId) => {
-            const cpfInput = document.getElementById(`cpf-${participantId}`);
-            const celularInput = document.getElementById(`celular-${participantId}`);
+            // Máscara para o Participante 1
+            const cpfInput1 = document.getElementById(`cpf-${participantId}-1`);
+            const celularInput1 = document.getElementById(`celular-${participantId}-1`);
 
-            if (cpfInput) {
-                IMask(cpfInput, {mask: '000.000.000-00'});
+            if (cpfInput1) {
+                IMask(cpfInput1, {mask: '000.000.000-00'});
             }
 
-            if (celularInput) {
+            if (celularInput1) {
                 const phoneMask = {
                     mask: [
                         {mask: '(00) 0000-0000'},
                         {mask: '(00) 90000-0000'}
                     ]
                 };
-                IMask(celularInput, phoneMask);
+                IMask(celularInput1, phoneMask);
+            }
+
+            // Máscara para o Participante 2 (Dupla)
+            const cpfInput2 = document.getElementById(`cpf-${participantId}-2`);
+            if (cpfInput2) {
+                IMask(cpfInput2, {mask: '000.000.000-00'});
             }
         };
 
@@ -465,7 +473,7 @@
 
 
             let participantCount = 0;
-            let participantsData = [];
+            let participantsData = []; // Armazena os dados dos INGRESSOS (que pode ser 1 ou 2 pessoas)
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
 
@@ -524,7 +532,7 @@
                 }
             };
 
-            // --- Funções de Ingresso e Resumo (Mantidas) ---
+            // --- Funções de Ingresso e Resumo ---
 
             const updateTotalPrice = () => {
                 let total = 0.00;
@@ -543,14 +551,26 @@
                 })}`;
             };
 
-            const toggleParticipantFields = (participantId, isVisible) => {
+            // Função para alternar campos de Participante 2
+            const toggleParticipantFields = (participantId, categoryId) => {
                 const participantForm = document.querySelector(`[data-participant="${participantId}"]`);
                 if (participantForm) {
                     const fieldsDiv = participantForm.querySelector('.participant-fields');
-                    if (isVisible) {
+                    const duoFieldsDiv = participantForm.querySelector('.participant-dupla-fields');
+                    const isCategorySelected = !!categoryId;
+
+                    if (isCategorySelected) {
                         fieldsDiv.classList.remove('hidden');
+                        const isDuoCategory = eventCategories[categoryId] && eventCategories[categoryId].permitirDupla === 1;
+
+                        if (isDuoCategory) {
+                            duoFieldsDiv.classList.remove('hidden');
+                        } else {
+                            duoFieldsDiv.classList.add('hidden');
+                        }
                     } else {
                         fieldsDiv.classList.add('hidden');
+                        duoFieldsDiv.classList.add('hidden');
                     }
                 }
             };
@@ -565,8 +585,12 @@
                         const oldId = form.getAttribute('data-participant');
                         form.setAttribute('data-participant', newIndex);
                         form.querySelector('.participant-title').textContent = `Ingresso ${newIndex}`;
-                        form.querySelectorAll('[id^="category-"], [id^="name-"], [id^="cpf-"], [id^="celular-"], [id^="nascimento-"], [id^="estado-"], [id^="cidade-"]').forEach(element => {
-                            const newId = element.id.replace(`-${oldId}`, `-${newIndex}`);
+
+                        // Atualiza IDs e FORs de todos os campos
+                        form.querySelectorAll('[id]').forEach(element => {
+                            // Substitui o ID antigo pelo novo (e.g., name-1-1 -> name-1-2)
+                            // A regex lida com os sufixos -1 e -2
+                            const newId = element.id.replace(new RegExp(`-${oldId}(-([12]))?$`), `-${newIndex}$2`);
                             element.id = newId;
                             const label = form.querySelector(`label[for="${element.id}"]`);
                             if (label) label.setAttribute('for', newId);
@@ -592,68 +616,107 @@
                         <select id="category-${i}" name="category[]" class="category-select mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
                             <option value="">Selecione a categoria</option>
                             @foreach($evento->categorias as $categoria)
-                <option value="{{$categoria->id}}" data-price="{{number_format($categoria->price, 2, '.', '')}}">{{$categoria->name}} (R$ {{number_format($categoria->price, 2, ',', '.')}})</option>
+                <option value="{{$categoria->id}}" data-price="{{number_format($categoria->price, 2, '.', '')}}">{{$categoria->name}} @if($categoria->permitirDupla) (DUPLA) @endif (R$ {{number_format($categoria->price, 2, ',', '.')}})</option>
                             @endforeach
                 </select>
             </div>
             <div class="participant-fields hidden">
+                <h5 class="font-bold text-gray-700 mt-4 mb-2">Dados do Participante 1 (Principal)</h5>
                 <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="name-${i}" class="block text-sm font-medium text-gray-700">Nome Completo</label>
-                                <input type="text" id="name-${i}" name="name[]" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Digite o nome completo">
-                            </div>
-                            <div>
-                                <label for="cpf-${i}" class="block text-sm font-medium text-gray-700">CPF</label>
-                                <input type="text" id="cpf-${i}" name="cpf[]" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="000.000.000-00">
-                            </div>
-                            <div>
-                                <label for="celular-${i}" class="block text-sm font-medium text-gray-700">Celular</label>
-                                <input type="text" id="celular-${i}" name="celular[]" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="(00) 9 0000-0000">
-                            </div>
-                            <div>
-                                <label for="nascimento-${i}" class="block text-sm font-medium text-gray-700">Data de nascimento</label>
-                                <input type="date" id="nascimento-${i}" name="nascimento[]" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                            </div>
-                            <div class="mt-2">
-                                        <label for="estado-${i}" class="block text-sm font-medium text-gray-700">Estado</label>
-                                        <select id="estado-${i}" name="estado[]" class="estado-select mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
-                                            <option value="">Selecione a UF</option>
-                                            @foreach($estados as $estado)
+                        <label for="name-${i}-1" class="block text-sm font-medium text-gray-700">Nome Completo</label>
+                        <input type="text" id="name-${i}-1" name="name_1[]" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Digite o nome completo">
+                    </div>
+                    <div>
+                        <label for="cpf-${i}-1" class="block text-sm font-medium text-gray-700">CPF</label>
+                        <input type="text" id="cpf-${i}-1" name="cpf_1[]" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="000.000.000-00">
+                    </div>
+                    <div>
+                        <label for="celular-${i}-1" class="block text-sm font-medium text-gray-700">Celular</label>
+                        <input type="text" id="celular-${i}-1" name="celular_1[]" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="(00) 9 0000-0000">
+                    </div>
+                    <div>
+                        <label for="nascimento-${i}-1" class="block text-sm font-medium text-gray-700">Data de nascimento</label>
+                        <input type="date" id="nascimento-${i}-1" name="nascimento_1[]" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                    <div class="mt-2">
+                        <label for="estado-${i}-1" class="block text-sm font-medium text-gray-700">Estado</label>
+                        <select id="estado-${i}-1" name="estado_1[]" class="estado-select mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                            <option value="">Selecione a UF</option>
+                            @foreach($estados as $estado)
                 <option value="{{$estado->nome}}">{{strtoupper($estado->nome)}}</option>
-                                            @endforeach
+                            @endforeach
                 </select>
             </div>
             <div class="mt-2">
-                        <label for="cidade-${i}" class="block text-sm font-medium text-gray-700">Cidade</label>
-                                        <select id="cidade-${i}" name="cidade[]" class="cidade-select mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
-                                            <option value="">Selecione a UF primeiro</option>
-                                </select>
-                            </div>
+                        <label for="cidade-${i}-1" class="block text-sm font-medium text-gray-700">Cidade</label>
+                        <select id="cidade-${i}-1" name="cidade_1[]" class="cidade-select mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                            <option value="">Selecione a UF primeiro</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="participant-dupla-fields hidden mt-6">
+                    <h5 class="font-bold text-gray-700 mb-2">Dados do Participante 2 (Dupla)</h5>
+                    <p class="text-xs text-gray-500 mb-3">Preencha os dados da pessoa que fará dupla com você.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="name-${i}-2" class="block text-sm font-medium text-gray-700">Nome Completo (Dupla)</label>
+                            <input type="text" id="name-${i}-2" name="name_2[]" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Nome do companheiro de dupla">
+                        </div>
+                        <div>
+                            <label for="cpf-${i}-2" class="block text-sm font-medium text-gray-700">CPF (Dupla)</label>
+                            <input type="text" id="cpf-${i}-2" name="cpf_2[]" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="000.000.000-00">
+                        </div>
+                        <div>
+                            <label for="nascimento-${i}-2" class="block text-sm font-medium text-gray-700">Data de nascimento (Dupla)</label>
+                            <input type="date" id="nascimento-${i}-2" name="nascimento_2[]" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        <div class="mt-2">
+                            <label for="estado-${i}-2" class="block text-sm font-medium text-gray-700">Estado (Dupla)</label>
+                            <select id="estado-${i}-2" name="estado_2[]" class="estado-select-2 mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                <option value="">Selecione a UF</option>
+                                @foreach($estados as $estado)
+                <option value="{{$estado->nome}}">{{strtoupper($estado->nome)}}</option>
+                                @endforeach
+                </select>
+            </div>
+            <div class="mt-2">
+                <label for="cidade-${i}-2" class="block text-sm font-medium text-gray-700">Cidade (Dupla)</label>
+                            <select id="cidade-${i}-2" name="cidade_2[]" class="cidade-select-2 mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                <option value="">Selecione a UF primeiro</option>
+                            </select>
                         </div>
                     </div>
+                </div>
+                </div>
                 </div>
             `;
                 formsContainer.insertAdjacentHTML('beforeend', formHtml);
                 lucide.createIcons();
                 applyMasks(i);
 
-                // Referências aos novos selects de Estado e Cidade
-                const estadoSelect = formsContainer.querySelector(`#estado-${i}`);
-                const cidadeSelect = formsContainer.querySelector(`#cidade-${i}`);
+                // Referências aos novos selects de Estado e Cidade - Participante 1
+                const estadoSelect1 = formsContainer.querySelector(`#estado-${i}-1`);
+                const cidadeSelect1 = formsContainer.querySelector(`#cidade-${i}-1`);
+                cidadeSelect1.disabled = true;
+                estadoSelect1.addEventListener('change', () => {
+                    fetchCities(estadoSelect1, cidadeSelect1);
+                });
 
-                // Inicializa o campo de cidade (estado inicial desabilitado com mensagem)
-                cidadeSelect.disabled = true;
-
-                // Listener para o select de Estado
-                estadoSelect.addEventListener('change', () => {
-                    fetchCities(estadoSelect, cidadeSelect);
+                // Referências aos novos selects de Estado e Cidade - Participante 2 (Dupla)
+                const estadoSelect2 = formsContainer.querySelector(`#estado-${i}-2`);
+                const cidadeSelect2 = formsContainer.querySelector(`#cidade-${i}-2`);
+                cidadeSelect2.disabled = true;
+                estadoSelect2.addEventListener('change', () => {
+                    fetchCities(estadoSelect2, cidadeSelect2);
                 });
 
 
                 const newSelect = formsContainer.querySelector(`#category-${i}`);
                 newSelect.addEventListener('change', (e) => {
-                    const isCategorySelected = !!e.target.value;
-                    toggleParticipantFields(i, isCategorySelected);
+                    const categoryId = e.target.value;
+                    toggleParticipantFields(i, categoryId);
                     updateTotalPrice();
                 });
 
@@ -676,53 +739,99 @@
                     pForm.querySelectorAll('input, select').forEach(input => input.classList.remove('border-red-500'));
 
                     const categoryInput = pForm.querySelector('select[name="category[]"]');
-                    const nameInput = pForm.querySelector('input[name="name[]"]');
-                    const cpfInput = pForm.querySelector('input[name="cpf[]"]');
-                    const celularInput = pForm.querySelector('input[name="celular[]"]');
-                    const nascimentoInput = pForm.querySelector('input[name="nascimento[]"]');
-                    const estadoInput = pForm.querySelector('select[name="estado[]"]');
-                    const cidadeInput = pForm.querySelector('select[name="cidade[]"]');
-
                     const category = categoryInput.value;
 
-                    if (category) {
-                        const name = nameInput.value.trim();
-                        const cpf = cpfInput.value.trim();
-                        const celular = celularInput.value.trim();
-                        const nascimento = nascimentoInput.value;
-                        const estado = estadoInput.value;
-                        const cidade = cidadeInput.value;
-
-
-                        const cleanedCpf = cpf.replace(/\D/g, '');
-                        const cleanedCelular = celular.replace(/\D/g, '');
-
-                        // Validação: Verifique todos os campos obrigatórios
-                        if (!name || !cpf || !celular || !nascimento || cleanedCpf.length !== 11 || cleanedCelular.length < 10 || !estado || !cidade) {
-                            hasError = true;
-                            if (!name) nameInput.classList.add('border-red-500');
-                            if (!cpf || cleanedCpf.length !== 11) cpfInput.classList.add('border-red-500');
-                            if (!celular || cleanedCelular.length < 10) celularInput.classList.add('border-red-500');
-                            if (!nascimento) nascimentoInput.classList.add('border-red-500');
-                            if (!estado) estadoInput.classList.add('border-red-500');
-                            if (!cidade) cidadeInput.classList.add('border-red-500');
-                        }
-
-                        participantsData.push({
-                            category,
-                            name,
-                            cpf: cleanedCpf,
-                            celular: cleanedCelular,
-                            nascimento,
-                            estado, // Adicionado estado
-                            cidade, // Adicionado cidade
-                            price: eventCategories[category] ? eventCategories[category].price : 0,
-                            category_name: eventCategories[category] ? eventCategories[category].name : 'N/A'
-                        });
-                    } else {
+                    if (!category) {
                         hasError = true;
                         categoryInput.classList.add('border-red-500');
+                        return; // Pula para o próximo ingresso
                     }
+
+                    // --- Dados Participante 1 (Principal) ---
+                    const nameInput1 = pForm.querySelector('input[name="name_1[]"]');
+                    const cpfInput1 = pForm.querySelector('input[name="cpf_1[]"]');
+                    const celularInput1 = pForm.querySelector('input[name="celular_1[]"]');
+                    const nascimentoInput1 = pForm.querySelector('input[name="nascimento_1[]"]');
+                    const estadoInput1 = pForm.querySelector('select[name="estado_1[]"]');
+                    const cidadeInput1 = pForm.querySelector('select[name="cidade_1[]"]');
+
+                    const name1 = nameInput1.value.trim();
+                    const cpf1 = cpfInput1.value.trim();
+                    const celular1 = celularInput1.value.trim();
+                    const nascimento1 = nascimentoInput1.value;
+                    const estado1 = estadoInput1.value;
+                    const cidade1 = cidadeInput1.value;
+
+                    const cleanedCpf1 = cpf1.replace(/\D/g, '');
+                    const cleanedCelular1 = celular1.replace(/\D/g, '');
+
+                    // Validação Participante 1
+                    if (!name1 || !cpf1 || !celular1 || !nascimento1 || cleanedCpf1.length !== 11 || cleanedCelular1.length < 10 || !estado1 || !cidade1) {
+                        hasError = true;
+                        if (!name1) nameInput1.classList.add('border-red-500');
+                        if (!cpf1 || cleanedCpf1.length !== 11) cpfInput1.classList.add('border-red-500');
+                        if (!celular1 || cleanedCelular1.length < 10) celularInput1.classList.add('border-red-500');
+                        if (!nascimento1) nascimentoInput1.classList.add('border-red-500');
+                        if (!estado1) estadoInput1.classList.add('border-red-500');
+                        if (!cidade1) cidadeInput1.classList.add('border-red-500');
+                    }
+
+
+                    // --- Dados Participante 2 (Dupla) - Se for Categoria Dupla ---
+                    let name2 = null, cpf2 = null, nascimento2 = null, estado2 = null, cidade2 = null;
+                    const isDuoCategory = eventCategories[category] && eventCategories[category].permitirDupla === 1;
+
+                    if (isDuoCategory) {
+                        const nameInput2 = pForm.querySelector('input[name="name_2[]"]');
+                        const cpfInput2 = pForm.querySelector('input[name="cpf_2[]"]');
+                        const nascimentoInput2 = pForm.querySelector('input[name="nascimento_2[]"]');
+                        const estadoInput2 = pForm.querySelector('select[name="estado_2[]"]');
+                        const cidadeInput2 = pForm.querySelector('select[name="cidade_2[]"]');
+
+                        name2 = nameInput2.value.trim();
+                        cpf2 = cpfInput2.value.trim();
+                        nascimento2 = nascimentoInput2.value;
+                        estado2 = estadoInput2.value;
+                        cidade2 = cidadeInput2.value;
+
+                        const cleanedCpf2 = cpf2.replace(/\D/g, '');
+
+                        // Validação Participante 2
+                        if (!name2 || !cpf2 || !nascimento2 || cleanedCpf2.length !== 11 || !estado2 || !cidade2) {
+                            hasError = true;
+                            if (!name2) nameInput2.classList.add('border-red-500');
+                            if (!cpf2 || cleanedCpf2.length !== 11) cpfInput2.classList.add('border-red-500');
+                            if (!nascimento2) nascimentoInput2.classList.add('border-red-500');
+                            if (!estado2) estadoInput2.classList.add('border-red-500');
+                            if (!cidade2) cidadeInput2.classList.add('border-red-500');
+                        }
+
+                        // Validação: CPF Duplicado na mesma dupla
+                        if (cleanedCpf1 === cleanedCpf2) {
+                            hasError = true;
+                            alert(`O CPF do Participante 2 (${cpf2}) é igual ao do Participante 1 no Ingresso ${index + 1}. Por favor, corrija.`);
+                            cpfInput2.classList.add('border-red-500');
+                        }
+                    }
+
+                    // Adiciona os dados do ingresso (1 ou 2 pessoas)
+                    participantsData.push({
+                        category,
+                        name1,
+                        cpf1: cleanedCpf1,
+                        celular: cleanedCelular1,
+                        nascimento1,
+                        estado1,
+                        cidade1,
+                        name2: name2,
+                        cpf2: cpf2 ? cpf2.replace(/\D/g, '') : null,
+                        nascimento2: nascimento2,
+                        estado2: estado2,
+                        cidade2: cidade2,
+                        price: eventCategories[category] ? eventCategories[category].price : 0,
+                        category_name: eventCategories[category] ? eventCategories[category].name : 'N/A',
+                        is_dupla: isDuoCategory
+                    });
                 });
 
                 return !hasError;
@@ -732,14 +841,26 @@
                 summaryContainer.innerHTML = '';
 
                 participantsData.forEach((p, index) => {
+                    let duplaHtml = '';
+                    if (p.is_dupla) {
+                        duplaHtml = `
+                            <p class="mt-2 font-semibold text-gray-800">Participante 2 (Dupla):</p>
+                            <p><strong>Nome:</strong> ${p.name2}</p>
+                            <p><strong>CPF:</strong> ${p.cpf2.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')}</p>
+                            <p><strong>Localidade:</strong> ${p.cidade2} (${p.estado2})</p>
+                        `;
+                    }
+
                     const summaryItem = `
                     <div class="p-4 border rounded-md bg-white shadow-sm">
                         <h4 class="font-bold text-gray-900 mb-2">Ingresso ${index + 1}: ${p.category_name}</h4>
                         <div class="text-sm text-gray-700 space-y-1">
-                            <p><strong>Nome:</strong> ${p.name}</p>
-                            <p><strong>CPF:</strong> ${p.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')}</p>
-                            <p><strong>Localidade:</strong> ${p.cidade} (${p.estado})</p>
-                            <p><strong>Valor:</strong> R$ ${p.price.toLocaleString('pt-BR', {
+                            <p class="font-semibold text-gray-800">Participante 1 (Principal):</p>
+                            <p><strong>Nome:</strong> ${p.name1}</p>
+                            <p><strong>CPF:</strong> ${p.cpf1.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')}</p>
+                            <p><strong>Localidade:</strong> ${p.cidade1} (${p.estado1})</p>
+                            ${duplaHtml}
+                            <p class="mt-2 font-bold text-blue-600">Valor Total: R$ ${p.price.toLocaleString('pt-BR', {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
                     })}</p>
@@ -757,7 +878,7 @@
             modalBackdrop.addEventListener('click', closeModal);
             addParticipantButton.addEventListener('click', addParticipantForm);
 
-            // --- LÓGICA DO PASSO 1: AUTENTICAÇÃO E REGISTRO ---
+            // --- LÓGICA DO PASSO 1: AUTENTICAÇÃO E REGISTRO (MANTIDA) ---
 
             // Alterna a exibição do formulário de registro
             showRegisterButton.addEventListener('click', (e) => {
@@ -869,7 +990,7 @@
             });
 
 
-            // --- Lógica de Passos (Mantida) ---
+            // --- Lógica de Passos (MANTIDA) ---
 
             nextToSummaryButton.addEventListener('click', () => {
                 if (collectAndValidateParticipants()) {
@@ -884,19 +1005,50 @@
                 showStep(2);
             });
 
-            // --- LÓGICA DE SUBMISSÃO FINAL (MERCADO PAGO) ---
+            // --- LÓGICA DE SUBMISSÃO FINAL (ADAPTADA AO NOVO JSON) ---
             finishPaymentButton.addEventListener('click', async () => {
                 if (participantsData.length === 0) return;
 
-                const submissionData = participantsData.map(p => ({
-                    category: p.category,
-                    name: p.name,
-                    cpf: p.cpf,
-                    celular: p.celular,
-                    nascimento: p.nascimento,
-                    estado: p.estado,
-                    cidade: p.cidade,
-                }));
+                // Mapeia os dados do array participantsData para o formato 'tickets'
+                const ticketsData = participantsData.map(p => {
+                    const clients = [];
+
+                    // Adiciona o Participante 1 (sempre presente)
+                    clients.push({
+                        name: p.name1,
+                        cpf: p.cpf1,
+                        celular: p.celular,
+                        nascimento: p.nascimento1,
+                        estado: p.estado1,
+                        cidade: p.cidade1,
+                    });
+
+                    // Adiciona o Participante 2 (se for categoria dupla)
+                    if (p.is_dupla) {
+                        clients.push({
+                            name: p.name2,
+                            cpf: p.cpf2,
+                            nascimento: p.nascimento2,
+                            estado: p.estado2,
+                            cidade: p.cidade2,
+                            // O celular do P2 é ignorado, pois o campo não existe no formulário para ele.
+                        });
+                    }
+
+                    return {
+                        categoryId: parseInt(p.category), // Certifica que é um inteiro
+                        clients: clients
+                    };
+                });
+
+                // Estrutura final do JSON a ser enviado
+                const submissionPayload = {
+                    eventId: {{$evento->id}},
+                    tickets: ticketsData
+                };
+
+                // Exemplo do payload para debug: console.log(JSON.stringify(submissionPayload, null, 2));
+
 
                 try {
                     finishPaymentButton.disabled = true;
@@ -911,10 +1063,7 @@
                             'X-CSRF-TOKEN': csrfToken, // Usa o token da meta tag
                             'Accept': 'application/json',
                         },
-                        body: JSON.stringify({
-                            evento_id: {{$evento->id}},
-                            participants: submissionData
-                        })
+                        body: JSON.stringify(submissionPayload) // Envia a nova estrutura
                     });
 
                     const result = await response.json();
