@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('tb_eventos', function (Blueprint $table) {
             $table->boolean('kit');
+            $table->integer('limiteinscritos')->nullable();
         });
     }
 
@@ -23,6 +24,7 @@ return new class extends Migration
     {
         Schema::table('tb_eventos', function (Blueprint $table) {
             $table->dropColumn('kit');
+            $table->dropColumn('limiteinscritos');
         });
     }
 };
