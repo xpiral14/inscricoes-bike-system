@@ -1054,25 +1054,27 @@
                     finishPaymentButton.disabled = true;
                     finishPaymentButton.innerHTML = '<span class="animate-pulse">Redirecionando...</span>';
 
-                    // Aqui, a requisição confia no cookie de sessão definido pelo login/registro
+                    // A requisição confia no cookie de sessão definido pelo login/registro
                     const response = await fetch("{{ route('inscricoes.store') }}", {
                         method: 'POST',
-                        credentials: 'include', // Assegura que o cookie de sessão seja enviado
+                        // ESTA LINHA É CRUCIAL PARA ENVIAR O COOKIE DE SESSÃO
+                        credentials: 'include',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken, // Usa o token da meta tag
+                            // ESTA LINHA É CRUCIAL PARA A SEGURANÇA DO LARAVEL
+                            'X-CSRF-TOKEN': csrfToken,
                             'Accept': 'application/json',
                         },
-                        body: JSON.stringify(submissionPayload) // Envia a nova estrutura
+                        body: JSON.stringify(submissionPayload)
                     });
 
                     const result = await response.json();
 
                     if (response.ok) {
-                        alert(result.id)
+                        // Redireciona o usuário para a URL de pagamento/sucesso
                         window.location.href = result.redirect_url;
                     } else {
-                        const errorMessage = result.message || 'Ocorreu um erro ao processar a inscrição. Tente novamente.';
+                        const errorMessage = result.message || 'Ocorreu um erro ao processar a inscrição.';
                         alert(`Erro: ${errorMessage}`);
                         finishPaymentButton.disabled = false;
                         finishPaymentButton.textContent = 'Ir para o Pagamento';
