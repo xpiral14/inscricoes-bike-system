@@ -66,7 +66,7 @@ COPY unit.json /docker-entrypoint.d/unit.json
 # Expõe a porta padrão do Unit
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
-  CMD curl -f http://localhost:8000/ || exit 1
+  CMD curl -f http://localhost:3000/ || exit 1
 
 # Inicializa o serviço
 CMD ["unitd", "--no-daemon"]
