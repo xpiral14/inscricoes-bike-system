@@ -75,4 +75,9 @@ class Evento extends Model
     {
         return $this->hasMany(EventoCupom::class, 'evento');
     }
+
+    public function podeInscrever()
+    {
+        return true;
+    }
 }
