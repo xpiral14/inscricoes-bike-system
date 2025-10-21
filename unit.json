@@ -1,28 +1,23 @@
 {
     "listeners": {
-        "*:8000": {
+        "*:3000": {
             "pass": "routes"
         }
     },
-
     "routes": [
         {
             "match": {
-                "uri": "!/index.php"
+                "uri": "/"
             },
             "action": {
-                "share": "/var/www/html/public$uri",
-                "fallback": {
-                    "pass": "applications/laravel"
-                }
+                "pass": "applications/laravel"
             }
         }
     ],
-
     "applications": {
         "laravel": {
             "type": "php",
-            "root": "/var/www/html/public/",
+            "root": "/var/www/html",
             "script": "index.php"
         }
     }
