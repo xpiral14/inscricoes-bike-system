@@ -25,7 +25,7 @@ return new class extends Migration
         // Se ela for NOT NULL, use '1970-01-01 00:00:01' em vez de NULL.
         DB::statement("
             UPDATE `tb_eventos`
-            SET `datacad` = NULL
+            SET `datacad` = '2025-01-01 00:00:00'
             WHERE `datacad` = '0000-00-00 00:00:00'
         ");
 
