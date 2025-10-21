@@ -4,20 +4,25 @@
             "pass": "routes"
         }
     },
+
     "routes": [
         {
             "match": {
-                "uri": "/"
+                "uri": "!/index.php"
             },
             "action": {
-                "pass": "applications/laravel"
+                "share": "/var/www/html/public$uri",
+                "fallback": {
+                    "pass": "applications/laravel"
+                }
             }
         }
     ],
+
     "applications": {
         "laravel": {
             "type": "php",
-            "root": "/var/www/html",
+            "root": "/var/www/html/public/",
             "script": "index.php"
         }
     }
