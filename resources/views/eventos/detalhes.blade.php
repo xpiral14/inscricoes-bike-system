@@ -346,6 +346,7 @@
 
         // VARIÁVEL DE AUTENTICAÇÃO INJETADA PELO BLADE
         let apiToken = @json(Auth::check());
+        let userId = @json(Auth::id());
 
         // Funções de Máscara (Mantidas)
         const applyMasks = (participantId) => {
@@ -878,7 +879,7 @@
             modalBackdrop.addEventListener('click', closeModal);
             addParticipantButton.addEventListener('click', addParticipantForm);
 
-            // --- LÓGICA DO PASSO 1: AUTENTICAÇÃO E REGISTRO (MANTIDA) ---
+            // --- LÓGICA DO PASSO 1: AUTENTICAÇÃO E REGISTRO ---
 
             // Alterna a exibição do formulário de registro
             showRegisterButton.addEventListener('click', (e) => {
@@ -903,8 +904,11 @@
             // Submissão do formulário de LOGIN
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const cpf = document.getElementById('login-cpf').value.replace(/\D/g, '');
-                const nascimento = document.getElementById('login-nascimento').value;
+                const cpfInput = document.getElementById('login-cpf');
+                const nascimentoInput = document.getElementById('login-nascimento');
+
+                const cpf = cpfInput.value.replace(/\D/g, '');
+                const nascimento = nascimentoInput.value;
 
                 if (cpf.length !== 11 || !nascimento) {
                     alert('Por favor, preencha o CPF e a Data de Nascimento corretamente.');
@@ -915,7 +919,6 @@
                 loginSubmitButton.innerHTML = '<span class="animate-pulse">Autenticando...</span>';
 
                 try {
-                    // Usamos o X-CSRF-TOKEN da meta tag. O navegador envia o cookie de sessão automaticamente.
                     const response = await fetch("{{ route('api.login') }}", {
                         method: 'POST',
                         credentials: 'include',
@@ -928,12 +931,29 @@
                     });
 
                     if (response.ok) {
-                        apiToken = true; // Atualiza o estado para "autenticado"
-                        showStep(2); // Avança para a seleção de ingressos
+                        apiToken = true;
+                        const responseJson = await response.json();
+                        userId =  responseJson.usuario.id
+                        showStep(2);
                         alert('Login realizado com sucesso! Prossiga com sua inscrição.');
                     } else {
-                        const result = await response.json(); // Tenta ler a mensagem de erro
-                        alert(result.erro || result.message || 'Login falhou. Verifique suas credenciais.');
+                        // **INÍCIO DA REFATORAÇÃO**
+                        const result = await response.json();
+                        alert(result.erro || result.message || 'Cadastro não encontrado. Complete seus dados para se registrar.');
+
+                        // Preenche os dados no formulário de registro
+                        document.getElementById('register-cpf').value = cpfInput.value;
+                        document.getElementById('register-nascimento').value = nascimento;
+
+                        // Alterna para o formulário de registro
+                        loginFormContainer.classList.add('hidden');
+                        registerFormContainer.classList.remove('hidden');
+                        registerText.textContent = 'Já sou cliente?';
+                        showRegisterButton.textContent = 'Voltar ao Login';
+
+                        // Foca no campo de nome
+                        document.getElementById('register-name').focus();
+                        // **FIM DA REFATORAÇÃO**
                     }
                 } catch (error) {
                     alert('Erro de comunicação com o servidor.');
@@ -961,7 +981,6 @@
                 registerSubmitButton.innerHTML = '<span class="animate-pulse">Registrando...</span>';
 
                 try {
-                    // Usamos o X-CSRF-TOKEN da meta tag. O navegador envia o cookie de sessão automaticamente.
                     const response = await fetch("{{ route('api.register') }}", {
                         method: 'POST',
                         credentials: 'include',
@@ -970,12 +989,13 @@
                             'X-CSRF-TOKEN': csrfToken,
                             'Accept': 'application/json',
                         },
-                        body: JSON.stringify({name: name, email: email, cpf: cpf, nascimento: nascimento})
+                        body: JSON.stringify({nome: name, email: email, cpf: cpf, nascimento: nascimento})
                     });
 
                     if (response.ok) {
-                        apiToken = true; // Atualiza o estado para "autenticado"
-                        showStep(2); // Avança para a seleção de ingressos
+                        apiToken = true;
+                        userId = (await response.json()).usuario.id;
+                        showStep(2);
                         alert('Cadastro e Login realizados com sucesso! Prossiga com sua inscrição.');
                     } else {
                         const result = await response.json();
@@ -990,7 +1010,7 @@
             });
 
 
-            // --- Lógica de Passos (MANTIDA) ---
+            // --- Lógica de Passos ---
 
             nextToSummaryButton.addEventListener('click', () => {
                 if (collectAndValidateParticipants()) {
@@ -1005,15 +1025,12 @@
                 showStep(2);
             });
 
-            // --- LÓGICA DE SUBMISSÃO FINAL (ADAPTADA AO NOVO JSON) ---
+            // --- LÓGICA DE SUBMISSÃO FINAL ---
             finishPaymentButton.addEventListener('click', async () => {
                 if (participantsData.length === 0) return;
 
-                // Mapeia os dados do array participantsData para o formato 'tickets'
                 const ticketsData = participantsData.map(p => {
                     const clients = [];
-
-                    // Adiciona o Participante 1 (sempre presente)
                     clients.push({
                         name: p.name1,
                         cpf: p.cpf1,
@@ -1023,7 +1040,6 @@
                         cidade: p.cidade1,
                     });
 
-                    // Adiciona o Participante 2 (se for categoria dupla)
                     if (p.is_dupla) {
                         clients.push({
                             name: p.name2,
@@ -1031,37 +1047,30 @@
                             nascimento: p.nascimento2,
                             estado: p.estado2,
                             cidade: p.cidade2,
-                            // O celular do P2 é ignorado, pois o campo não existe no formulário para ele.
                         });
                     }
 
                     return {
-                        categoryId: parseInt(p.category), // Certifica que é um inteiro
+                        categoryId: parseInt(p.category),
                         clients: clients
                     };
                 });
 
-                // Estrutura final do JSON a ser enviado
                 const submissionPayload = {
                     eventId: {{$evento->id}},
-                    tickets: ticketsData
+                    tickets: ticketsData,
+                    userId
                 };
-
-                // Exemplo do payload para debug: console.log(JSON.stringify(submissionPayload, null, 2));
-
 
                 try {
                     finishPaymentButton.disabled = true;
                     finishPaymentButton.innerHTML = '<span class="animate-pulse">Redirecionando...</span>';
 
-                    // A requisição confia no cookie de sessão definido pelo login/registro
                     const response = await fetch("{{ route('inscricoes.store') }}", {
                         method: 'POST',
-                        // ESTA LINHA É CRUCIAL PARA ENVIAR O COOKIE DE SESSÃO
                         credentials: 'include',
                         headers: {
                             'Content-Type': 'application/json',
-                            // ESTA LINHA É CRUCIAL PARA A SEGURANÇA DO LARAVEL
                             'X-CSRF-TOKEN': csrfToken,
                             'Accept': 'application/json',
                         },
@@ -1071,7 +1080,6 @@
                     const result = await response.json();
 
                     if (response.ok) {
-                        // Redireciona o usuário para a URL de pagamento/sucesso
                         window.location.href = result.redirect_url;
                     } else {
                         const errorMessage = result.message || 'Ocorreu um erro ao processar a inscrição.';
