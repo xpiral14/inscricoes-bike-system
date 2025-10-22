@@ -3,9 +3,13 @@
 namespace App\Providers;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,9 +35,33 @@ class AppServiceProvider extends ServiceProvider
             return "<?php echo 'R$' . number_format($expression, 2, ',', '.'); ?>";
         });
 
+        if ($this->app->environment() === 'local') {
+            if (config('app.debug')) {
+                $this->enableSQLLog();
+            }
+
+        }
+
         if (config('app.env') === 'production') {
             URL::forceScheme('https');
         }
 
+    }
+
+    private function enableSQLLog(): void
+    {
+        DB::listen(static function (QueryExecuted $query) {
+            $sql = $query->sql;
+
+            foreach ($query->bindings as $binding) {
+                $value = is_numeric($binding) ? $binding : "'{$binding}'";
+                $sql   = preg_replace('/\?/', $value, $sql, 1);
+            }
+
+            if (Str::contains($sql, 'telescope')){
+                return;
+            }
+            Log::channel('sql')->info("Query: {$sql}\nTempo de execução: {$query->time}ms");
+        });
     }
 }

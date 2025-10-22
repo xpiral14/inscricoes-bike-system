@@ -23,6 +23,7 @@ class InscricaoController extends Controller
     {
         // 1. Validação dos dados recebidos do frontend
         $validator = Validator::make($request->all(), [
+            'userId' => 'required|integer|exists:tb_usuarios,id',
             'eventId'                        => 'required|integer|exists:tb_eventos,id',
             'tickets'                        => 'required|array|min:1',
             'tickets.*.categoryId'           => 'required|integer|exists:tb_event_categories,id', // Ajuste a tabela de categorias
@@ -39,8 +40,6 @@ class InscricaoController extends Controller
             return response()->json(['message' => 'Dados inválidos.', 'errors' => $validator->errors()], 422);
         }
 
-        // 2. Recupera o usuário autenticado pela SESSÃO
-        $usuarioLogado = Auth::user();
         $validatedData = $validator->validated();
         $evento        = Evento::find($validatedData['eventId']);
         if (!$evento) {
@@ -54,10 +53,11 @@ class InscricaoController extends Controller
         DB::beginTransaction();
         try {
 
-            $inscricao = EventoInscricao::query()->create([
-                                                              'evento_id' => $validatedData['eventId'],
-
-                                                          ]);
+            $data      = [
+                'evento_id'  => $validatedData['eventId'],
+                'usuario_id' => $request->userId
+            ];
+            $inscricao = EventoInscricao::query()->create($data);
 
             $usuarios = Usuario::query()->whereIn('cpf', array_column($validatedData['tickets'], 'clients.*.cpf'))->get()->keyBy('id');
 
@@ -78,7 +78,8 @@ class InscricaoController extends Controller
                     }
                     $inscricao->inscritos()->create([
                                                         'evento'     => $validatedData['eventId'],
-                                                        'usuario'    => $usuario->id, // O comprador é sempre o usuário logado
+                                                        'usuario'    => $request->userId,
+                                                        'usuario_id' => $usuario->id, // O comprador é sempre o usuário logado
                                                         'categoryID' => $ticket['categoryId'],
                                                     ]);
                 }
@@ -90,13 +91,14 @@ class InscricaoController extends Controller
 
             return response()->json([
                                         'message' => 'Inscrição realizada com sucesso!',
-                                                                                                                                                                                                                                                                                                       'redirect_url' => $redirectUrl, 'redirect_url' => $redirectUrl
+                                        'redirect_url' => $redirectUrl, 'redirect_url' => $redirectUrl
                                     ], 200);
 
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error($e->getMessage());
-            return response()->json(['message' => 'Ocorreu um erro interno ao processar sua inscrição.'], 500);
+            throw $e;
+            //return response()->json(['message' => 'Ocorreu um erro interno ao processar sua inscrição.'], 500);
         }
     }
 }
