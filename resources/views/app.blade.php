@@ -43,7 +43,9 @@
 {{-- Cabeçalho Fixo --}}
 <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
     <nav class="container mx-auto px-4 lg:px-8 py-4 flex justify-between items-center">
-        <a href="/" class="text-2xl font-bold text-blue-500">Inscrições<span class="text-gray-900">.bike</span></a>
+        <a href="/" class="text-2xl font-bold text-blue-500">
+            <img src="{{asset('/images/logo.jpeg')}}" alt="Logomarca do inscrições.com.br"  class="h-[50px]"/>
+        </a>
         <div class="hidden md:flex items-center space-x-6 text-sm font-medium">
             <a href="{{ route('home') }}" class="text-gray-600 hover:text-blue-500 transition-colors">Início</a>
             <a href="#" class="text-gray-600 hover:text-blue-500 transition-colors">Eventos</a>
