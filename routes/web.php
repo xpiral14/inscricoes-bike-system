@@ -16,5 +16,4 @@ Route::get('login', [AuthController::class, 'create'])->name('login');
 Route::post('login', [AuthController::class, 'store'])->name('login.store');
 Route::post('logout', [AuthController::class, 'destroy'])->middleware('auth')->name('logout');
 Route::post('/inscricoes', [InscricaoController::class, 'store'])
-    ->middleware('auth') // Apenas usuários autenticados podem acessar
     ->name('inscricoes.store');
