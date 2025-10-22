@@ -78,8 +78,8 @@ class InscricaoController extends Controller
                     }
                     $inscricao->inscritos()->create([
                                                         'evento'     => $validatedData['eventId'],
-                                                        'usuario'    => $request->userId,
-                                                        'usuario_id' => $usuario->id, // O comprador é sempre o usuário logado
+                                                        'usuario_id' => $request->userId,
+                                                        'usuario'    => $usuario->id, // O comprador é sempre o usuário logado
                                                         'categoryID' => $ticket['categoryId'],
                                                     ]);
                 }
