@@ -11,6 +11,7 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Width;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -28,7 +29,6 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
             ->colors([
                 'primary' => Color::Blue,
             ])
@@ -56,6 +56,18 @@ class AdminPanelProvider extends PanelProvider
             ->maxContentWidth(Width::Full)
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->renderHook(
+                PanelsRenderHook::GLOBAL_SEARCH_AFTER,
+                fn () => \Blade::render(
+                    '<a href="/" target="_blank" class="fi-btn fi-btn-size-md fi-btn-primary fi-btn-icon-only fi-color-primary flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold outline-none transition duration-75 hover:bg-gray-50 focus:ring-2 focus:ring-primary-500 disabled:pointer-events-none disabled:opacity-70 dark:hover:bg-gray-900 dark:focus:ring-primary-500">
+                        <x-filament::icon
+                            icon="heroicon-o-home"
+                            class="fi-btn-icon h-5 w-5"
+                        />
+                        <span class="sr-only">Início</span>
+                    </a>'
+                )
+            );;
     }
 }
