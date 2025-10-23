@@ -58,7 +58,7 @@ class AppServiceProvider extends ServiceProvider
                 $sql   = preg_replace('/\?/', $value, $sql, 1);
             }
 
-            if (Str::contains($sql, 'telescope')){
+            if (Str::contains($sql, 'telescope') || Str::contains($sql, 'sessions')){
                 return;
             }
             Log::channel('sql')->info("Query: {$sql}\nTempo de execução: {$query->time}ms");
