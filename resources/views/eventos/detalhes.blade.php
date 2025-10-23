@@ -433,6 +433,41 @@
             }
         };
 
+        const populateFirstParticipantForm = async (userData) => {
+            const nameInput = document.getElementById('name-1-1');
+            const cpfInput = document.getElementById('cpf-1-1');
+            const celularInput = document.getElementById('celular-1-1');
+            const nascimentoInput = document.getElementById('nascimento-1-1');
+            const estadoSelect = document.getElementById('estado-1-1');
+            const cidadeSelect = document.getElementById('cidade-1-1');
+
+            if (!nameInput || !cpfInput || !celularInput || !nascimentoInput || !estadoSelect || !cidadeSelect) {
+                console.error('Um ou mais campos do primeiro participante não foram encontrados.');
+                return;
+            }
+
+            nameInput.value = userData.nome || '';
+            cpfInput.value = userData.cpf || '';
+            celularInput.value = userData.telefone || '';
+
+            if (userData.data_nascimento) {
+                nascimentoInput.value = userData.data_nascimento.substring(0, 10);
+            }
+
+            if (userData.uf) {
+                estadoSelect.value = userData.uf.toLowerCase();
+                await fetchCities(estadoSelect, cidadeSelect);
+                cidadeSelect.value = userData.cidade || '';
+            }
+
+            applyMasks(1);
+
+            [nameInput, cpfInput, nascimentoInput].forEach(input => {
+                input.readOnly = true;
+                input.classList.add('bg-gray-100', 'cursor-not-allowed');
+            });
+        };
+
 
         // Garante que o script rode após o carregamento do DOM
         document.addEventListener('DOMContentLoaded', () => {
@@ -933,27 +968,18 @@
                     if (response.ok) {
                         apiToken = true;
                         const responseJson = await response.json();
-                        userId =  responseJson.usuario.id
+                        userId = responseJson.usuario.id
                         showStep(2);
-                        // alert('Login realizado com sucesso! Prossiga com sua inscrição.');
+                        await populateFirstParticipantForm(responseJson.usuario);
                     } else {
-                        // **INÍCIO DA REFATORAÇÃO**
                         const result = await response.json();
-                        // alert(result.erro || result.message || 'Cadastro não encontrado. Complete seus dados para se registrar.');
-
-                        // Preenche os dados no formulário de registro
                         document.getElementById('register-cpf').value = cpfInput.value;
                         document.getElementById('register-nascimento').value = nascimento;
-
-                        // Alterna para o formulário de registro
                         loginFormContainer.classList.add('hidden');
                         registerFormContainer.classList.remove('hidden');
                         registerText.textContent = 'Já sou cliente?';
                         showRegisterButton.textContent = 'Voltar ao Login';
-
-                        // Foca no campo de nome
                         document.getElementById('register-name').focus();
-                        // **FIM DA REFATORAÇÃO**
                     }
                 } catch (error) {
                     alert('Erro de comunicação com o servidor.');
@@ -994,8 +1020,10 @@
 
                     if (response.ok) {
                         apiToken = true;
-                        userId = (await response.json()).usuario.id;
+                        const responseJson = await response.json();
+                        userId = responseJson.usuario.id;
                         showStep(2);
+                        await populateFirstParticipantForm(responseJson.usuario);
                     }
                 } catch (error) {
                     alert('Erro de comunicação com o servidor durante o registro.');
