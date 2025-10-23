@@ -217,7 +217,7 @@
                             </div>
                             <button type="submit" id="login-submit-button"
                                     class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md transition-colors">
-                                Fazer Login
+                                Realizar inscrição
                             </button>
                         </form>
                     </div>
@@ -267,7 +267,7 @@
                             </div>
                             <button type="submit" id="register-submit-button"
                                     class="w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-md transition-colors">
-                                Registrar e Continuar
+                                Realizar inscrição
                             </button>
                         </form>
                     </div>
@@ -935,11 +935,11 @@
                         const responseJson = await response.json();
                         userId =  responseJson.usuario.id
                         showStep(2);
-                        alert('Login realizado com sucesso! Prossiga com sua inscrição.');
+                        // alert('Login realizado com sucesso! Prossiga com sua inscrição.');
                     } else {
                         // **INÍCIO DA REFATORAÇÃO**
                         const result = await response.json();
-                        alert(result.erro || result.message || 'Cadastro não encontrado. Complete seus dados para se registrar.');
+                        // alert(result.erro || result.message || 'Cadastro não encontrado. Complete seus dados para se registrar.');
 
                         // Preenche os dados no formulário de registro
                         document.getElementById('register-cpf').value = cpfInput.value;
@@ -959,7 +959,7 @@
                     alert('Erro de comunicação com o servidor.');
                 } finally {
                     loginSubmitButton.disabled = false;
-                    loginSubmitButton.textContent = 'Fazer Login';
+                    loginSubmitButton.textContent = 'Realizar incrição';
                 }
             });
 
@@ -996,10 +996,6 @@
                         apiToken = true;
                         userId = (await response.json()).usuario.id;
                         showStep(2);
-                        alert('Cadastro e Login realizados com sucesso! Prossiga com sua inscrição.');
-                    } else {
-                        const result = await response.json();
-                        alert(result.message || 'Falha no cadastro. Tente outro CPF ou E-mail.');
                     }
                 } catch (error) {
                     alert('Erro de comunicação com o servidor durante o registro.');
