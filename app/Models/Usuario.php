@@ -5,14 +5,12 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Laravel\Sanctum\HasApiTokens;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Usuario extends Authenticatable implements FilamentUser, HasName
 {
-    use HasApiTokens;
     protected $table = 'tb_usuarios';
 
     protected $casts = [
