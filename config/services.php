@@ -34,5 +34,11 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'mercado_pago' => [
+        'access_token'         => env('MERCADOPAGO_ACCESS_TOKEN'), // Adicione esta linha
+        'client_id'     => env('MP_CLIENT_ID'),
+        'client_secret' => env('MP_CLIENT_SECRET'),
+        'application_id'=> env('MP_APP_ID'),
+    ]
 
 ];
