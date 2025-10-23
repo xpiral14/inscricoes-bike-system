@@ -12,3 +12,4 @@ Route::post('/login', [\App\Http\Controllers\SessionController::class, 'login'])
 Route::post('/register', [\App\Http\Controllers\SessionController::class, 'register'])->name('api.register');
 
 
+Route::post('/webhooks/mercado-pago', [\App\Http\Controllers\WebhookController::class, 'handleMercadoPago'])->name('api.webhooks.mercado-pago');

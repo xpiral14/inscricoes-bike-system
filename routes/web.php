@@ -17,3 +17,4 @@ Route::post('login', [AuthController::class, 'store'])->name('login.store');
 Route::post('logout', [AuthController::class, 'destroy'])->middleware('auth')->name('logout');
 Route::post('/inscricoes', [InscricaoController::class, 'store'])
     ->name('inscricoes.store');
+
