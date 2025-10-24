@@ -9,38 +9,12 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
-    {{-- CDN para a biblioteca IMask.js para aplicar máscaras de input --}}
     <script src="https://unpkg.com/imask@6.0.7/dist/imask.js"></script>
-
-    <style>
-        body {
-            background-color: #F9FAFB; /* bg-gray-50 */
-            color: #1F2937; /* text-gray-800 */
-        }
-
-        /* Estilos para a transição suave do modal */
-        #registration-modal {
-            transition: opacity 0.3s ease-in-out;
-        }
-
-        #modal-panel {
-            transition: transform 0.3s ease-in-out;
-        }
-
-        /* Estilo para a borda de erro */
-        .border-red-500 {
-            border-color: #EF4444;
-        }
-        .required::after{
-            content: '*';
-        }
-    </style>
 
     @yield('styles')
 </head>
 <body class="antialiased">
 
-{{-- Cabeçalho Fixo --}}
 <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
     <nav class="container mx-auto px-4 lg:px-8 py-4 flex justify-between items-center">
         <a href="/" class="text-2xl font-bold text-blue-500">
@@ -53,11 +27,16 @@
             <a href="#" class="text-gray-600 hover:text-blue-500 transition-colors">Contato</a>
         </div>
 
-        {{-- Lógica de exibição condicional --}}
         <div class="flex items-center space-x-4">
             @auth
                 {{-- Se o usuário ESTIVER logado --}}
-                <span class="text-gray-800 font-medium">Olá, {{ Auth::user()->nome }}</span>
+                <div class="hidden sm:flex items-center space-x-4">
+                    <span class="text-gray-800 font-medium">Olá, {{ Auth::user()->nome }}</span>
+                    {{-- NOVO LINK ADICIONADO AQUI --}}
+                    <a href="{{ route('minha-conta.compras') }}" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-semibold rounded-md transition-colors">
+                        Minhas Compras
+                    </a>
+                </div>
 
                 {{-- Formulário de Logout --}}
                 <form method="POST" action="{{ route('logout') }}">
@@ -76,12 +55,11 @@
         </div>
     </nav>
 </header>
-{{-- Conteúdo Principal da Página (o que muda) --}}
+
 <main class="container mx-auto px-4 lg:px-8 py-8">
     @yield('content')
 </main>
 
-{{-- Rodapé Fixo --}}
 <footer class="bg-white border-t border-gray-200 mt-12">
     <div class="container mx-auto px-4 lg:px-8 py-8 text-center text-gray-500 text-sm">
         <p>© 2025 Inscrições.bike - Todos os direitos reservados.</p>
@@ -89,13 +67,11 @@
     </div>
 </footer>
 
-{{-- O MODAL DE INSCRIÇÃO: Fica no template principal pois é global --}}
 @yield('modal')
 
 @yield('scripts')
 
 <script>
-    // Inicializa os ícones da biblioteca Lucide globalmente
     lucide.createIcons();
 </script>
 
