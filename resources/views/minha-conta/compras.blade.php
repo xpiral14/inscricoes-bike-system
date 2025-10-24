@@ -74,7 +74,7 @@
                             <h3 class="mt-4 text-xl font-semibold text-gray-700">Nenhuma compra encontrada</h3>
                             <p class="mt-2 text-gray-500">Você ainda não realizou nenhuma inscrição em eventos. Que tal
                                 encontrar um agora?</p>
-                            <a href="#"
+                            <a href="{{route('home')}}"
                                class="mt-6 inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors">
                                 Ver Eventos
                             </a>
