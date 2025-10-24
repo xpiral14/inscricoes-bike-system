@@ -72,6 +72,7 @@ class InscricaoController extends Controller
         DB::beginTransaction();
         try {
             $inscricao = EventoInscricao::create([
+                                                     'situacao' => 94,
                                                      'evento_id' => $evento->id,
                                                      'usuario_id' => $user->id,
                                                      'datacad' => now(),
@@ -195,6 +196,8 @@ class InscricaoController extends Controller
                 "notification_url"   =>  config('app.url') . "api/webhook/mercadopago",
             ];
             $preference = $client->create($arr);
+            $inscricao->paymentLink = $preference->init_point;
+            $inscricao->save();
 
             DB::commit();
 
