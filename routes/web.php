@@ -18,3 +18,8 @@ Route::post('logout', [AuthController::class, 'destroy'])->middleware('auth')->n
 Route::post('/inscricoes', [InscricaoController::class, 'store'])
     ->name('inscricoes.store');
 
+
+Route::middleware('auth')->group(function () {
+    Route::get('/minha-conta/compras', [\App\Http\Controllers\DashboardController::class, 'compras'])->name('minha-conta.compras');
+    // Você pode adicionar outras rotas da conta aqui no futuro (perfil, etc.)
+});
